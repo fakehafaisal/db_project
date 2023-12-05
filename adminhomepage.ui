@@ -17,8 +17,8 @@
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>20</y>
+      <x>40</x>
+      <y>10</y>
       <width>601</width>
       <height>391</height>
      </rect>
@@ -110,7 +110,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>320</y>
+       <y>330</y>
        <width>81</width>
        <height>21</height>
       </rect>
@@ -198,10 +198,10 @@ background-image: url(:/newPrefix/Downloads/person pic.webp);</string>
     <widget class="QLabel" name="label_13">
      <property name="geometry">
       <rect>
-       <x>130</x>
+       <x>140</x>
        <y>350</y>
        <width>121</width>
-       <height>31</height>
+       <height>21</height>
       </rect>
      </property>
      <property name="font">
@@ -239,10 +239,10 @@ background-image: url(:/newPrefix/Downloads/person pic.webp);</string>
     <widget class="QLabel" name="label_15">
      <property name="geometry">
       <rect>
-       <x>400</x>
+       <x>300</x>
        <y>350</y>
        <width>151</width>
-       <height>31</height>
+       <height>21</height>
       </rect>
      </property>
      <property name="font">
@@ -453,7 +453,7 @@ background-image: url(:/newPrefix/approval-logo.webp);</string>
     <widget class="QLabel" name="label_18">
      <property name="geometry">
       <rect>
-       <x>30</x>
+       <x>90</x>
        <y>350</y>
        <width>41</width>
        <height>21</height>
@@ -475,8 +475,8 @@ background-image: url(:/newPrefix/approval-logo.webp);</string>
     <widget class="QLabel" name="label_19">
      <property name="geometry">
       <rect>
-       <x>310</x>
-       <y>350</y>
+       <x>240</x>
+       <y>340</y>
        <width>51</width>
        <height>31</height>
       </rect>
@@ -492,6 +492,25 @@ background-image: url(:/newPrefix/approval-logo.webp);</string>
      </property>
      <property name="scaledContents">
       <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="logout_admin">
+     <property name="geometry">
+      <rect>
+       <x>500</x>
+       <y>352</y>
+       <width>91</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Log Out</string>
      </property>
     </widget>
    </widget>

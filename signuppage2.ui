@@ -213,7 +213,7 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>360</y>
+      <y>350</y>
       <width>81</width>
       <height>16</height>
      </rect>
@@ -226,7 +226,7 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>330</y>
+      <y>320</y>
       <width>81</width>
       <height>16</height>
      </rect>
@@ -239,7 +239,7 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>300</y>
+      <y>290</y>
       <width>71</width>
       <height>16</height>
      </rect>
@@ -274,9 +274,9 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>260</x>
-      <y>300</y>
-      <width>151</width>
+      <x>240</x>
+      <y>290</y>
+      <width>110</width>
       <height>22</height>
      </rect>
     </property>
@@ -284,9 +284,9 @@
    <widget class="QComboBox" name="comboBox">
     <property name="geometry">
      <rect>
-      <x>260</x>
-      <y>330</y>
-      <width>151</width>
+      <x>240</x>
+      <y>320</y>
+      <width>71</width>
       <height>22</height>
      </rect>
     </property>
@@ -309,8 +309,8 @@
    <widget class="QLineEdit" name="phonenumber">
     <property name="geometry">
      <rect>
-      <x>260</x>
-      <y>360</y>
+      <x>240</x>
+      <y>350</y>
       <width>151</width>
       <height>20</height>
      </rect>
@@ -384,27 +384,27 @@
      <string>patient</string>
     </property>
    </widget>
+   <widget class="QLineEdit" name="phonenumber_2">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>380</y>
+      <width>151</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
    <widget class="QLabel" name="label_14">
     <property name="geometry">
      <rect>
-      <x>130</x>
-      <y>390</y>
+      <x>150</x>
+      <y>380</y>
       <width>101</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
      <string>Emergency Contact:</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="lineEdit_5">
-    <property name="geometry">
-     <rect>
-      <x>260</x>
-      <y>390</y>
-      <width>151</width>
-      <height>20</height>
-     </rect>
     </property>
    </widget>
   </widget>
@@ -414,7 +414,7 @@
      <x>0</x>
      <y>0</y>
      <width>673</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
