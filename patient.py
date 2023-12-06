@@ -6,8 +6,8 @@ import pyodbc
 from PyQt6.QtCore import Qt
 
 
-server = 'DESKTOP-HPUUN98\SPARTA'
-database = 'db_project'  # Name of your Northwind database
+server = 'M\SPARTA'
+database = 'basabkhatamproject'  # Name of your Northwind database
 use_windows_authentication = True  # Set to True to use Windows Authentication
 
 # 1main homepage
@@ -611,7 +611,7 @@ class Patient_Records(QtWidgets.QMainWindow):
 
         self.show()
         self.user = user
-        print(self.user)
+        # print(self.user)
         
         self.search_patient.clicked.connect(self.search_pat)
 
@@ -639,7 +639,7 @@ class Patient_Records(QtWidgets.QMainWindow):
         if chosen_row != -1:
             firstname= self.tableWidget.item(chosen_row,0).text()
             p_contact = self.tableWidget.item(chosen_row,4).text()
-            print(firstname,p_contact)
+            # print(firstname,p_contact)
             
             
         self.new_form = Patient_History(self.user,firstname,p_contact)
@@ -725,16 +725,7 @@ class Patient_History(QtWidgets.QMainWindow):
         self.user = user
 
         self.back_to_rec.clicked.connect(self.back_to_list)
-        self.populate_screen(firstname,p_contact)
         
-        # self.checkBox_6.clear()
-
-    def back_to_list(self):
-        self.new_form = Patient_Records(self.user)
-        self.new_form.show()
-        self.close()
-        
-    def populate_screen(self,firstname,p_contact):
         # Create the connection string based on the authentication method chosen
         connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
 
@@ -745,9 +736,35 @@ class Patient_History(QtWidgets.QMainWindow):
         cursor = connection.cursor()
         # TODO: Write SQL query to fetch orders data
         cursor.execute("""
-                    select first_name,last_name,email,DOB,contact,emergency_contact,year(GETDATE()) - year(DOB) as age,gender,patient_weight,patient_id from patients join gender on patients.gender_id=gender.gender_id where first_name+' '+last_name = ? and contact = ?
+                    select patient_id from patients where first_name+' '+last_name = ? and contact = ?
 
                 """,firstname,p_contact)
+        
+        patientID = cursor.fetchone()[0]
+        
+        self.populate_screen(patientID)
+        
+        # self.checkBox_6.clear()
+
+    def back_to_list(self):
+        self.new_form = Patient_Records(self.user)
+        self.new_form.show()
+        self.close()
+        
+    def populate_screen(self,patientID):
+        # Create the connection string based on the authentication method chosen
+        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
+
+        # Establish a connection to the database
+        connection = pyodbc.connect(connection_string)
+        
+        # Create a cursor to interact with the database
+        cursor = connection.cursor()
+        # TODO: Write SQL query to fetch orders data
+        cursor.execute("""
+                    select first_name,last_name,email,DOB,contact,emergency_contact,year(GETDATE()) - year(DOB) as age,gender,patient_weight from patients join gender on patients.gender_id=gender.gender_id where patient_id = ?
+
+                """,patientID)
         
         patient_info = cursor.fetchall()
         # print(patient_info)
@@ -764,10 +781,10 @@ class Patient_History(QtWidgets.QMainWindow):
             self.lineEdit_18.setText(str(patient_info[0][8]))
 
             
-        else:
-            print('no')
+        # else:
+            # print('no')
         
-        patientid = patient_info[0][-1]
+        # patientid = patient_info[0][-1]
 
         cursor.execute("""
             SELECT P.patient_id, A.appointment_id, COUNT(P.patient_id) as visitNumbers
@@ -775,10 +792,10 @@ class Patient_History(QtWidgets.QMainWindow):
             JOIN Appointments_booked A ON P.patient_id = A.patient_id
             WHERE P.patient_id = ?
             GROUP BY P.patient_id, A.appointment_id;
-        """, patientid)
+        """, patientID)
 
         patient_appointments = cursor.fetchall()
-        print(patient_appointments)
+        # print(patient_appointments)
         
         
         # appoint_ids = []
@@ -806,7 +823,7 @@ class Patient_History(QtWidgets.QMainWindow):
         
     def get_selected_text(self):
         selected_text = self.comboBox.currentText()
-        print(f"Selected Text: {selected_text}")
+        # print(f"Selected Text: {selected_text}")
         iteration_num=int(selected_text)-1
         corresponding_appointment_id=self.appoint_ids[iteration_num]
         # print(corresponding_appointment_id)
@@ -886,7 +903,7 @@ class Patient_History(QtWidgets.QMainWindow):
                 """,corresponding_appointment_id)
         
         admitted = cursor.fetchall()
-        print(admitted)
+        # print(admitted)
         if admitted:
                 is_admitted = admitted[0].is_admitted
                 print(is_admitted)
@@ -965,7 +982,6 @@ class Appointments(QtWidgets.QMainWindow):
 
     def appointment_expanded(self):
         chosen_row = self.apptable.currentRow()
-        # chosen_row = self.apptable.currentRow()
         
         if chosen_row != -1:
             
@@ -974,7 +990,7 @@ class Appointments(QtWidgets.QMainWindow):
             time = self.apptable.item(chosen_row, 2).text()
             day = self.apptable.item(chosen_row, 3).text()
             cancelled=eval(self.apptable.item(chosen_row, 4).text())
-            print(name,time,day,cancelled)
+            # print(name,time,day,cancelled)
 
         self.new_form = Appointments_details(name, time, day, cancelled)
         self.new_form.show()
@@ -1059,16 +1075,32 @@ class Appointments_details(QtWidgets.QMainWindow):
         self.show()
 
         self.back_to_app_list.clicked.connect(self.back_to_applist)
+        
+        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
+        connection = pyodbc.connect(connection_string)
 
-        # self.pat_history.clicked.connect(self.viewhistory)
+        cursor = connection.cursor()
 
+        
+        cursor.execute("""
+            SELECT patient_id
+            FROM patients
+            WHERE first_name + ' ' + last_name = ?;
+        """, name)
+        
+        patientID = cursor.fetchone()[0]
+        self.patientID = patientID
+        # print(patientID)
+        self.insert_contact(patientID)
+        
         self.edit_history.clicked.connect(self.patient_his_editable)
-
-        self.insert_contact(name)
         
         # self.search_appointment_and_update_date(name)
         
-    def insert_contact(self, patient_name):
+        connection.close()
+        
+        
+    def insert_contact(self,patientID):
             connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
             connection = pyodbc.connect(connection_string)
 
@@ -1078,15 +1110,14 @@ class Appointments_details(QtWidgets.QMainWindow):
             cursor.execute("""
                 SELECT contact
                 FROM patients
-                WHERE first_name + ' ' + last_name = ?;
-            """, patient_name)
+                WHERE patient_id = ?;
+            """, patientID)
 
             contact_info = cursor.fetchall()
 
             if contact_info:
                 # Fetch the contact information from the result
                 contact_value = contact_info[0][0]
-                # print(contact_value)
 
                 # Clear existing text in the line edit (assuming self.lineEditContact is your line edit widget)
                 self.lineEdit_2.clear()
@@ -1101,37 +1132,14 @@ class Appointments_details(QtWidgets.QMainWindow):
 
             connection.close()  # Make sure to close the connection even if an exception occurs
 
-
-    # def viewhistory(self):
-        
-    #     patient_name = self.lineEdit.text()
-    #     print(patient_name)
-        
-    #     connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
-    #     connection = pyodbc.connect(connection_string)
-        
-    #     cursor = connection.cursor()
-
-    #     cursor.execute("""
-    #         SELECT patient_id
-    #         FROM patients
-    #         WHERE first_name + ' ' + last_name = ?;
-    #     """, patient_name)
-
-    #     contact_info = cursor.fetchall()
-    #     id = contact_info[0][0]
-    
-    #     self.new_form = app_view_doc(id)
-    #     self.new_form.show()
-    #     self.close()
         
     def back_to_applist(self):
         self.new_form = Appointments()
         self.new_form.show()
         self.close()
 
-    def patient_his_editable(self):
-        self.new_form = editable_patient_history()
+    def patient_his_editable(self,patientID):
+        self.new_form = editable_patient_history(self.patientID)
         self.new_form.show()
         
 # 13slots available booking
@@ -1438,10 +1446,19 @@ class Private_view_patient(QtWidgets.QMainWindow):
         # Create a cursor to interact with the database
         cursor = connection.cursor()
         # TODO: Write SQL query to fetch orders data
+        
         cursor.execute("""
-                    select first_name,last_name,email,DOB,contact,emergency_contact,year(GETDATE()) - year(DOB) as age,gender,patient_weight,patient_id from patients join gender on patients.gender_id=gender.gender_id where email =?
+                    select patient_id from patients join gender on patients.gender_id=gender.gender_id where email =?
 
-                """,email)
+                """,email)  #all emails are unique in our database
+        
+        patientID = cursor.fetchone()[0]
+        # print(patientID)
+        
+        cursor.execute("""
+                    select first_name,last_name,email,DOB,contact,emergency_contact,year(GETDATE()) - year(DOB) as age,gender,patient_weight from patients join gender on patients.gender_id=gender.gender_id where patient_id =?
+
+                """,patientID)  #all emails are unique in our database
         
         patient_info = cursor.fetchall()
         # print(patient_info)
@@ -1462,7 +1479,7 @@ class Private_view_patient(QtWidgets.QMainWindow):
             print('no')
         
         # print(patient_info)
-        patientid = patient_info[0][-1]
+        # patientid = patient_info[0][-1]
 
         cursor.execute("""
             SELECT P.patient_id, A.appointment_id, COUNT(P.patient_id) as visitNumbers
@@ -1470,7 +1487,7 @@ class Private_view_patient(QtWidgets.QMainWindow):
             JOIN Appointments_booked A ON P.patient_id = A.patient_id
             WHERE P.patient_id = ?
             GROUP BY P.patient_id, A.appointment_id;
-        """, patientid)
+        """, patientID)
 
         patient_appointments = cursor.fetchall()
         print(patient_appointments)
@@ -2427,23 +2444,67 @@ class MedicalApprovalScreen(QWidget):
 
 # 20editable patient history view by doctor only
 class editable_patient_history(QtWidgets.QMainWindow):  
-    def __init__(self):
+    def __init__(self,patientID):
         super(editable_patient_history, self).__init__() 
         uic.loadUi('edit_patient_record.ui', self) 
         self.setWindowTitle("Patient History")
-
+        
+        # print(patientID)
+        self.patientID = patientID
+        self.appoint_ids = []
 
         self.width = self.frameGeometry().width()
         self.height = self.frameGeometry().height()
         self.setFixedSize(self.width, self.height)
 
+        self.populate_screen(self.patientID)
+        
         self.show()
+        
 
+        self.addButton.clicked.connect(self.add_symptoms)
+        
+        self.addButton2.clicked.connect(self.add_diagnosis)
+        
+        self.addButton3.clicked.connect(self.add_allergies)
+        
+        self.addButton4.clicked.connect(self.add_treatment)
+        
         self.save_rec.clicked.connect(self.changes_saved)
-
-        # self.back.clicked.connect(self.go_back_to_app_details)
-
+        
+    def add_symptoms(self):
+        symptoms = self.lineEdit_13.text()
+        self.listWidget.addItem(symptoms)
+        self.lineEdit_13.clear()
+        
+    def add_diagnosis(self):
+        diagnosis = self.lineEdit_17.text()
+        self.listWidget_3.addItem(diagnosis)
+        self.lineEdit_17.clear()
+        
+    def add_allergies(self):
+        allergies = self.lineEdit_7.text()
+        self.listWidget_2.addItem(allergies)
+        self.lineEdit_7.clear()
+        
+    def add_treatment(self):
+        treatment = self.lineEdit.text()
+        self.listWidget_4.addItem(treatment)
+        self.lineEdit.clear()
+    
     def changes_saved(self):
+        
+        # storing symptoms from list widget
+        for i in range(self.listWidget.count()):
+            symptom = self.listWidget.item(i).text()
+            print(symptom)
+            # connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
+            # connection = pyodbc.connect(connection_string)
+            # cursor = connection.cursor()
+            # connection.close()
+        
+        
+        
         output=QMessageBox(self)              
         output.setWindowTitle("Patient Medical History") 
         output.setText("Changes saved successfully!.")
@@ -2451,11 +2512,55 @@ class editable_patient_history(QtWidgets.QMainWindow):
         output.setIcon(QMessageBox.Icon.Information) 
         button=output.exec()
         self.close()
+        
+    def populate_screen(self,patientID):
+        self.patientID = patientID
+        # Create the connection string based on the authentication method chosen
+        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
 
-    # def go_back_to_app_details(self):
-    #     self.new_form = Appointments_details()
-    #     self.new_form.show()
-    #     self.close()
+        # Establish a connection to the database
+        connection = pyodbc.connect(connection_string)
+        
+        # Create a cursor to interact with the database
+        cursor = connection.cursor()
+        # TODO: Write SQL query to fetch orders data
+        cursor.execute("""
+                    select first_name,last_name,email,DOB,contact,emergency_contact,year(GETDATE()) - year(DOB) as age,gender,patient_weight from patients join gender on patients.gender_id=gender.gender_id where patient_id = ?
+
+                """,patientID)
+        
+        patient_info = cursor.fetchall()
+        
+        if patient_info:
+            self.lineEdit_14.setText(str(patient_info[0][2]))
+            self.lineEdit_3.setText(str(patient_info[0][0]))
+            self.lineEdit_5.setText(str(patient_info[0][1]))
+            self.lineEdit_2.setText(str(patient_info[0][7]))
+            self.lineEdit_4.setText(str(patient_info[0][6]))
+            self.lineEdit_11.setText(str(patient_info[0][4]))
+            self.lineEdit_12.setText(str(patient_info[0][5]))
+            self.lineEdit_15.setText(str(patient_info[0][3]))
+            self.lineEdit_18.setText(str(patient_info[0][8]))
+
+            
+        else:
+            print('no')
+            
+        cursor.execute("""
+            SELECT P.patient_id, COUNT(P.patient_id) as visitNumbers
+            FROM Patients P
+            JOIN Appointments_booked A ON P.patient_id = A.patient_id
+            WHERE P.patient_id = ?
+            GROUP BY P.patient_id
+        """, patientID)
+
+        current_visit_no = cursor.fetchall()[0][1]+1
+        self.lineEdit_8.setText(str(current_visit_no))
+                
+        # Close the database connection
+        connection.close()
+        
+
 
 app = QtWidgets.QApplication(sys.argv)
 window = MainWindow()
