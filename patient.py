@@ -501,8 +501,6 @@ class Admin_homepage(QtWidgets.QMainWindow):
     
         self.payments.clicked.connect(self.view_payments)
 
-        self.doc_approval.clicked.connect(self.approvals_disapproval)
-
 
     def admin_logout(self):
         self.new_form = ViewBook3()
@@ -521,11 +519,6 @@ class Admin_homepage(QtWidgets.QMainWindow):
 
     def view_payments(self):
         self.new_form = payment_details()
-        self.new_form.show()
-        self.close()
-
-    def approvals_disapproval(self):
-        self.new_form = MedicalApprovalScreen()
         self.new_form.show()
         self.close()
 
@@ -565,7 +558,7 @@ class Doctor_homepage(QtWidgets.QMainWindow):
 
 # 8patient homepage
 class Patient_homepage(QtWidgets.QMainWindow):  
-    def __init__(self, email):
+    def __init__(self, email="default"):
         super(Patient_homepage, self).__init__() 
         uic.loadUi('patienthomeFINAL2.0.ui', self) 
         self.setWindowTitle("Patient Homepage")
@@ -583,6 +576,8 @@ class Patient_homepage(QtWidgets.QMainWindow):
 
         self.view_my_rec.clicked.connect(self.private_records)
 
+        self.view_booked_app.clicked.connect(self.my_appointments)
+
     def patient_logout(self):
         self.new_form = ViewBook3()
         self.new_form.show()
@@ -597,6 +592,12 @@ class Patient_homepage(QtWidgets.QMainWindow):
         self.new_form = Appointments_booking()
         self.new_form.show()
         self.close()
+
+    def my_appointments(self):
+        self.new_form = patient_booked_appointments()
+        self.new_form.show()
+        self.close()
+
 
 # 9patient list
 class Patient_Records(QtWidgets.QMainWindow):  
@@ -648,37 +649,44 @@ class Patient_Records(QtWidgets.QMainWindow):
 
     def search_pat(self):
         inputname = self.patient_name.text().lower()
-        
-        new_lst=[]
 
-        for row in range(self.tableWidget.rowCount()):
-            table_name = self.tableWidget.item(row, 0).text().lower()
+        # Create a SQL query to search for patients based on the input name
+        query = f"""
+            SELECT 
+                first_name+' '+last_name,
+                year(GETDATE()) - year(DOB) as age,
+                (SELECT TOP 1 gender FROM gender WHERE patients.gender_id = gender.gender_id) AS gender,
+                DOB,
+                contact
+            FROM patients
+            WHERE first_name LIKE ? OR last_name LIKE ?;
+        """
 
-            # Check if the table name starts with the input name
-            if table_name.startswith(inputname):
-                # Append the entire row data
-                new_lst.append([self.tableWidget.item(row, col).text() for col in range(self.tableWidget.columnCount())])
+        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
+        connection = pyodbc.connect(connection_string)
 
+        cursor = connection.cursor()
+        cursor.execute(query, ('%' + inputname + '%', '%' + inputname + '%'))
+
+        # Clear the table before populating with new data
         self.tableWidget.clear()
 
-        # self.booksTableWidget.setRowCount(len(new_lst))
-        for i in range(len(new_lst)):
-            for j in range(5):
-                item = QTableWidgetItem(new_lst[i][j])
-                # Make the items non-editable
+        for row_index, row_data in enumerate(cursor.fetchall()):
+            self.tableWidget.insertRow(row_index)
+            for col_index, cell_data in enumerate(row_data):
+                item = QTableWidgetItem(str(cell_data))
                 item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable) 
-                self.tableWidget.setItem(i, j, item)
+                self.tableWidget.setItem(row_index, col_index, item)
+
+    # Close the database connection
+        connection.close()
+
 
     def populate_table(self):
-        # Create the connection string based on the authentication method chosen
         connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
-
-        # Establish a connection to the database
         connection = pyodbc.connect(connection_string)
         
-        # Create a cursor to interact with the database
         cursor = connection.cursor()
-        # TODO: Write SQL query to fetch orders data
         cursor.execute("""
                     SELECT 
                     first_name+' '+last_name,
@@ -689,7 +697,6 @@ class Patient_Records(QtWidgets.QMainWindow):
                 FROM patients;
 
                 """)
-        # Fetch all rows and populate the table
         for row_index, row_data in enumerate(cursor.fetchall()):
             self.tableWidget.insertRow(row_index)
             for col_index, cell_data in enumerate(row_data):
@@ -1004,25 +1011,40 @@ class Appointments(QtWidgets.QMainWindow):
     def search_appointments(self):
         name_input = self.patient_app.text().lower()
 
-        new_lst = []
+        # Create a SQL query to search for appointments based on patient names
+        query = """
+            SELECT 
+                p.first_name + ' ' + p.last_name AS patient_name,
+                d.first_name + ' ' + d.last_name AS doctor_name,
+                s.start_time as appointment_start_time,
+                s.day as appointment_day,
+                a.cancel_appointment as appointment_cancel_status
+            FROM patients p
+            JOIN appointments_booked a ON p.patient_id = a.patient_id
+            JOIN slots_available s ON s.slot_id = a.slot_id
+            JOIN doctor d ON d.doctor_id = s.doctor_id
+            WHERE p.first_name LIKE ? OR p.last_name LIKE ?;
+        """
 
-        for row in range(self.apptable.rowCount()):
-            table_name = self.apptable.item(row, 0).text().lower()
-            
-            if table_name == name_input:
-                new_lst.append([self.apptable.item(row, col).text() for col in range(self.apptable.columnCount())])
+        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
+        connection = pyodbc.connect(connection_string)
 
-        # Clear the table and set the row count
+        cursor = connection.cursor()
+        cursor.execute(query, ('%' + name_input + '%', '%' + name_input + '%'))
+
+        # Clear the table before populating with new data
         self.apptable.clear()
-        self.apptable.setRowCount(len(new_lst))
 
-        # Populate the table with the new data
-        for i in range(len(new_lst)):
-            for j in range(self.apptable.columnCount()):
-                item = QtWidgets.QTableWidgetItem(new_lst[i][j])
+        for row_index, row_data in enumerate(cursor.fetchall()):
+            self.apptable.insertRow(row_index)
+            for col_index, cell_data in enumerate(row_data):
+                item = QtWidgets.QTableWidgetItem(str(cell_data))
                 # Make the items non-editable
                 item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable) 
-                self.apptable.setItem(i, j, item)
+                self.apptable.setItem(row_index, col_index, item)
+
+        # Close the database connection
+        connection.close()
 
     def populate_appointment_table(self):
         # Create the connection string based on the authentication method chosen
@@ -1175,7 +1197,7 @@ class Appointments_booking(QtWidgets.QMainWindow):
 
     def backtobooking(self):
     # Create an instance of Patient_homepage by passing the email parameter
-        self.new_form = Patient_homepage(self.email)
+        self.new_form = Patient_homepage()
         self.new_form.show()
         self.close()
 
@@ -1186,6 +1208,8 @@ class Appointments_booking(QtWidgets.QMainWindow):
         output.setStandardButtons( QMessageBox.StandardButton.Ok)
         output.setIcon(QMessageBox.Icon.Information) 
         button=output.exec()
+        self.new_form = Patient_homepage()
+        self.new_form.show()
         self.close()
         
     def populate_combobox(self):
@@ -1912,6 +1936,7 @@ class doctors_list(QtWidgets.QMainWindow):
         self.search_specialisation()
 
         self.populate_doctor_table()
+        
     def doc_information(self):
         chosen_row = self.tableWidget.currentRow()
         if chosen_row>=0:
@@ -1929,28 +1954,45 @@ class doctors_list(QtWidgets.QMainWindow):
         self.close()
 
     def search_doctor(self):
-        current_text = self.comboBox.currentText().lower()
-        new_lst = []
+        current_specialization = self.comboBox.currentText().lower()
 
-        for row in range(self.tableWidget.rowCount()):
-            table_name = self.tableWidget.item(row, 2).text().lower()
-            
-            if table_name == current_text:
-                new_lst.append([self.tableWidget.item(row, col).text() for col in range(self.tableWidget.columnCount())])
+        # Create a SQL query to search for doctors based on specialization
+        query = """
+            SELECT 
+                d.first_name + ' ' + d.last_name AS doctor_name,
+                g.gender AS doctor_gender,
+                s.specialization AS doctor_specialization,
+                d.assigned_pod AS doctor_assigned_pod
+            FROM
+                doctor d
+            JOIN
+                gender g ON d.gender_id = g.gender_id
+            JOIN
+                doctorspecialization ds ON d.doctor_id = ds.doctor_id
+            JOIN
+                specialization s ON ds.specialization_id = s.specialization_id
+            WHERE s.specialization = ?;
+        """
 
-        # Clear the table
+        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
+        connection = pyodbc.connect(connection_string)
+
+        cursor = connection.cursor()
+        cursor.execute(query, (current_specialization,))
+
+        # Clear the table before populating with new data
         self.tableWidget.clear()
 
-        # Set the row count
-        self.tableWidget.setRowCount(len(new_lst))
-
-        # Populate the table with the new data
-        for i in range(len(new_lst)):
-            for j in range(self.tableWidget.columnCount()):
-                item = QtWidgets.QTableWidgetItem(new_lst[i][j])
-                # Make the items non-editable
+        for row_index, row_data in enumerate(cursor.fetchall()):
+            self.tableWidget.insertRow(row_index)
+            for col_index, cell_data in enumerate(row_data):
+                item = QTableWidgetItem(str(cell_data))
                 item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable) 
-                self.tableWidget.setItem(i, j, item)
+                self.tableWidget.setItem(row_index, col_index, item)
+
+        # Close the database connection
+        connection.close()
+
 
     def search_specialisation(self):
         # populates combobox 
@@ -2322,125 +2364,103 @@ class payment_details(QtWidgets.QMainWindow):
     def search_pay(self):
         name_input = self.patient_payment.text().lower()
 
-        new_lst = []
+        # Create a SQL query to search for payments based on the patient name
+        query = """
+            SELECT 
+                patients.first_name + ' ' + patients.last_name as patient_name,
+                appointments_booked.amount,
+                payment_method.payment_method,
+                slots_available.start_time,
+                slots_available.end_time
+            FROM appointments_booked
+            JOIN patients ON appointments_booked.patient_id = patients.patient_id
+            JOIN payment_method ON appointments_booked.payment_method_id = payment_method.payment_method_id
+            JOIN slots_available ON slots_available.slot_id = appointments_booked.slot_id
+            WHERE patients.first_name LIKE ? OR patients.last_name LIKE ?;
+        """
 
-        for row in range(self.tableWidget.rowCount()):
-            table_name = self.tableWidget.item(row, 0).text().lower()
-            
-            if table_name.startswith(name_input):
-                new_lst.append([self.tableWidget.item(row, col).text() for col in range(self.tableWidget.columnCount())])
+        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
+        connection = pyodbc.connect(connection_string)
 
-        # Clear the table and set the row count
+        cursor = connection.cursor()
+        cursor.execute(query, ('%' + name_input + '%', '%' + name_input + '%'))
+
+        # Clear the table before populating with new data
         self.tableWidget.clear()
-        self.tableWidget.setRowCount(len(new_lst))
 
-        # Populate the table with the new data
-        for i in range(len(new_lst)):
-            for j in range(self.tableWidget.columnCount()):
-                item = QtWidgets.QTableWidgetItem(new_lst[i][j])
+        for row_index, row_data in enumerate(cursor.fetchall()):
+            self.tableWidget.insertRow(row_index)
+            for col_index, cell_data in enumerate(row_data):
+                item = QtWidgets.QTableWidgetItem(str(cell_data))
                 # Make the items non-editable
                 item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable) 
-                self.tableWidget.setItem(i, j, item)
-# 19approval/disapproval screen
-class MedicalApprovalScreen(QWidget):
+                self.tableWidget.setItem(row_index, col_index, item)
+
+        # Close the database connection
+        connection.close()
+
+# 19patient can view their own appointments
+class patient_booked_appointments(QtWidgets.QMainWindow):  
     def __init__(self):
-        super().__init__()
+        super(patient_booked_appointments, self).__init__() 
+        uic.loadUi('app_booked(patient).ui', self) 
+        self.setWindowTitle("My Booked Appointments")
 
-        self.initUI()
+        self.width = self.frameGeometry().width()
+        self.height = self.frameGeometry().height()
+        self.setFixedSize(self.width, self.height)
 
-    def initUI(self):
-        self.setWindowTitle('Pending Approvals Screen')
-        self.setGeometry(350, 130, 673, 450)
+        self.show()
 
-        # Create the table widget
-        self.tableWidget = QTableWidget(self)
-        self.tableWidget.setColumnCount(3)
-        self.tableWidget.setHorizontalHeaderLabels(['Doctor Name', 'Medical License#', 'Approve/Deny'])
+        self.pushButton.clicked.connect(self.backtohomepage)
 
-        # Set the number of rows and populate with random data
-        self.tableWidget.setRowCount(5)
-        self.populateTableWithData()
+        self.populate_doctor_appointment_table()
 
-        # Set layout
-        layout = QVBoxLayout()
-        layout.addWidget(self.tableWidget)
-
-        self.backButton = QPushButton('Back', self)
-        self.backButton.clicked.connect(self.goBack)
-
-        self.saveButton = QPushButton('Save', self)
-        self.saveButton.clicked.connect(self.saveData)
-
-        # Add a horizontal layout for the Save button
-        button_layout = QHBoxLayout()
-        button_layout.addStretch(1)  # Add stretchable space before the button
-        button_layout.addWidget(self.backButton)
-        button_layout.addWidget(self.saveButton)
-        layout.addLayout(button_layout)
-
-        self.setLayout(layout)
-
-    def populateTableWithData(self):
-        # You can replace this with your data retrieval logic
-        # data = [
-        #     ['Dr. Smith', '12345', '555-1234', ''],
-        #     ['Dr. Johnson', '67890', '555-5678', ''],
-        #     ['Dr. Williams', '13579', '555-9876', ''],
-        #     ['Dr. Davis', '24680', '555-4321', ''],
-        #     ['Dr. Anderson', '98765', '555-8765', '']
-        #  ]
-        # After populating the table with data, set the width of the last column
-        last_column_index = self.tableWidget.columnCount() - 1
-        self.tableWidget.setColumnWidth(last_column_index, 200)
-        # After populating the table with data, set the height of all rows
-        desired_row_height = 40  # Replace with your preferred height
-        for row in range(self.tableWidget.rowCount()):
-            self.tableWidget.setRowHeight(row, desired_row_height)
-
-        # for row, entry in enumerate(data):
-        #     for col, value in enumerate(entry):
-        #         item = QTableWidgetItem(str(value))
-        #         self.tableWidget.setItem(row, col, item)
-
-        #         # Add radio buttons to the last column
-        #         if col == 3:
-        #             approve_radio = QRadioButton('Approve')
-        #             deny_radio = QRadioButton('Deny')
-
-        #             radio_layout = QHBoxLayout()
-        #             radio_layout.addWidget(approve_radio)
-        #             radio_layout.addWidget(deny_radio)
-        #             radio_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        #             widget = QWidget()
-        #             widget.setLayout(radio_layout)
-
-        #             self.tableWidget.setCellWidget(row, col, widget)
-
-        #             # Connect the radio buttons to a slot (function)
-        #             approve_radio.toggled.connect(lambda state, row=row, col=col: self.radioToggled(state, row, col, 'Approve'))
-        #             deny_radio.toggled.connect(lambda state, row=row, col=col: self.radioToggled(state, row, col, 'Deny'))
-
-    def radioToggled(self, state, row, col, value):
-        if state:
-            print(f'Row {row + 1}, Column {col + 1}: {value} selected')
-
-    def saveData(self):
-        # Add logic to save data
-        output=QMessageBox(self)              
-        output.setWindowTitle("Doctor Approvals") 
-        output.setText("Changes saved successfully!.")
-        output.setStandardButtons( QMessageBox.StandardButton.Ok)
-        output.setIcon(QMessageBox.Icon.Information) 
-        button=output.exec()
-        print('Data saved!')
-
-    def goBack(self):
-        # Add logic to save data
-        self.new_form = Admin_homepage("admin")
+    def backtohomepage(self):
+        self.new_form = Patient_homepage()
         self.new_form.show()
         self.close()
-        print('back to home page!')
+
+    def populate_doctor_appointment_table(self):
+        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
+        connection = pyodbc.connect(connection_string)
+        
+        # Create a cursor to interact with the database
+        cursor = connection.cursor()
+        
+        # TODO: Write SQL query to fetch doctor appointment data with assigned pod
+        cursor.execute("""
+                    SELECT 
+                        d.first_name + ' ' + d.last_name AS doctor_name,
+                        d.assigned_pod AS doctor_assigned_pod,
+                        s.day AS appointment_day,
+                        FORMAT(CONVERT(datetime, s.year + '-' + s.month + '-' + s.dateday), 'dd/MM/yyyy') AS appointment_date, 
+                       CONVERT(VARCHAR, s.start_time, 108) AS appointment_start_time
+                    FROM appointments_booked a
+                    JOIN slots_available s ON a.slot_id = s.slot_id
+                    JOIN doctor d ON d.doctor_id = s.doctor_id;
+                """)
+
+
+        for row_index, row_data in enumerate(cursor.fetchall()):
+            self.doctor_appointment_table.insertRow(row_index)
+            for col_index, cell_data in enumerate(row_data):
+                item = QTableWidgetItem(str(cell_data))
+                item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable) 
+                self.doctor_appointment_table.setItem(row_index, col_index, item)
+
+        # Close the database connection
+        connection.close()
+
+        # Adjust content display
+        header = self.doctor_appointment_table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
+
+
 
 # 20editable patient history view by doctor only
 class editable_patient_history(QtWidgets.QMainWindow):  
