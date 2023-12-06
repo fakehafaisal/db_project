@@ -151,9 +151,9 @@
     <widget class="QLabel" name="label_8">
      <property name="geometry">
       <rect>
-       <x>40</x>
+       <x>80</x>
        <y>150</y>
-       <width>91</width>
+       <width>101</width>
        <height>101</height>
       </rect>
      </property>
@@ -294,7 +294,7 @@ background-image: url(:/newPrefix/Downloads/person pic.webp);</string>
     <widget class="QPushButton" name="patient_admin">
      <property name="geometry">
       <rect>
-       <x>30</x>
+       <x>80</x>
        <y>270</y>
        <width>101</width>
        <height>31</height>
@@ -307,7 +307,7 @@ background-image: url(:/newPrefix/Downloads/person pic.webp);</string>
     <widget class="QPushButton" name="payments">
      <property name="geometry">
       <rect>
-       <x>170</x>
+       <x>240</x>
        <y>270</y>
        <width>101</width>
        <height>31</height>
@@ -335,23 +335,10 @@ background-image: url(:/newPrefix/Downloads/person pic.webp);</string>
       <string>patient records, doctor records  appointments</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="doc_approval">
-     <property name="geometry">
-      <rect>
-       <x>310</x>
-       <y>270</y>
-       <width>101</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Doctor Approvals</string>
-     </property>
-    </widget>
     <widget class="QPushButton" name="doc_admin">
      <property name="geometry">
       <rect>
-       <x>460</x>
+       <x>400</x>
        <y>270</y>
        <width>101</width>
        <height>31</height>
@@ -364,7 +351,7 @@ background-image: url(:/newPrefix/Downloads/person pic.webp);</string>
     <widget class="QLabel" name="label_5">
      <property name="geometry">
       <rect>
-       <x>170</x>
+       <x>240</x>
        <y>150</y>
        <width>101</width>
        <height>101</height>
@@ -383,35 +370,13 @@ background-image: url(:/newPrefix/Downloads/person pic.webp);</string>
       <bool>true</bool>
      </property>
     </widget>
-    <widget class="QLabel" name="label_9">
-     <property name="geometry">
-      <rect>
-       <x>260</x>
-       <y>150</y>
-       <width>71</width>
-       <height>71</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-image: url(:/newPrefix/Downloads/approval-logo.webp);</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="pixmap">
-      <pixmap>:/newPrefix/Downloads/approval-logo.webp</pixmap>
-     </property>
-     <property name="scaledContents">
-      <bool>true</bool>
-     </property>
-    </widget>
     <widget class="QLabel" name="label_10">
      <property name="geometry">
       <rect>
-       <x>460</x>
+       <x>400</x>
        <y>150</y>
-       <width>91</width>
-       <height>91</height>
+       <width>101</width>
+       <height>101</height>
       </rect>
      </property>
      <property name="styleSheet">
@@ -422,29 +387,6 @@ background-image: url(:/newPrefix/Downloads/person pic.webp);</string>
      </property>
      <property name="pixmap">
       <pixmap>docfinal.jpg</pixmap>
-     </property>
-     <property name="scaledContents">
-      <bool>true</bool>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_11">
-     <property name="geometry">
-      <rect>
-       <x>310</x>
-       <y>150</y>
-       <width>101</width>
-       <height>101</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-image: url(:/newPrefix/Downloads/docfinal.jpg);
-background-image: url(:/newPrefix/approval-logo.webp);</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="pixmap">
-      <pixmap>approval-logo.webp</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>
