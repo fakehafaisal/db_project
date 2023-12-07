@@ -269,6 +269,7 @@ class ViewBook3(QtWidgets.QMainWindow):
         login_email = self.lineEdit_2.text()  
         login_password = self.lineEdit_3.text()  
 
+
         if ((self.radioButton.isChecked() == False) and (self.radioButton_2.isChecked() == False) and (self.radioButton_3.isChecked() == False)):
             output=QMessageBox(self)              
             output.setWindowTitle("Unidentified Person") 
@@ -293,13 +294,13 @@ class ViewBook3(QtWidgets.QMainWindow):
             output.setIcon(QMessageBox.Icon.Warning) 
             button=output.exec()
 
-        elif ((len(login_password)<=5 and len(login_password)>0) or (login_password.isalpha() == True)):
-                output=QMessageBox(self)              
-                output.setWindowTitle("Weak Password") 
-                output.setText("Please use a strong password.")
-                output.setStandardButtons( QMessageBox.StandardButton.Ok)
-                output.setIcon(QMessageBox.Icon.Warning) 
-                button=output.exec()
+        # elif ((len(login_password)<=5 and len(login_password)>0) or (login_password.isalpha() == True)):
+        #         output=QMessageBox(self)              
+        #         output.setWindowTitle("Weak Password") 
+        #         output.setText("Please use a strong password.")
+        #         output.setStandardButtons( QMessageBox.StandardButton.Ok)
+        #         output.setIcon(QMessageBox.Icon.Warning) 
+        #         button=output.exec()
 
         else:
             if (self.radioButton.isChecked()==True):
@@ -573,7 +574,7 @@ class Doctor_homepage(QtWidgets.QMainWindow):
 
 # 8patient homepage
 class Patient_homepage(QtWidgets.QMainWindow):  
-    def __init__(self, email="default"):
+    def __init__(self, email):
         super(Patient_homepage, self).__init__() 
         uic.loadUi('patienthomeFINAL2.0.ui', self) 
         self.setWindowTitle("Patient Homepage")
@@ -729,7 +730,6 @@ class Patient_Records(QtWidgets.QMainWindow):
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
         
-
     
 # 10expanded patient history
 class Patient_History(QtWidgets.QMainWindow):  
@@ -2497,6 +2497,7 @@ class patient_booked_appointments(QtWidgets.QMainWindow):
 
         self.show()
         self.email = email
+        print(self.email)
         
         connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
         connection = pyodbc.connect(connection_string)
@@ -2512,32 +2513,30 @@ class patient_booked_appointments(QtWidgets.QMainWindow):
             # Ensure that patientID is defined before using it
             patientID = result[0][0]
             self.populate_doctor_appointment_table(patientID)
-        else:
-            # Handle the case where no patient ID is found for the given email
-            print("Patient ID not found for email:", self.email)
 
         self.pushButton.clicked.connect(self.backtohomepage)
 
 
-        # self.populate_doctor_appointment_table(patientID)
+        self.populate_doctor_appointment_table(patientID)
 
     def backtohomepage(self):
-        self.new_form = Patient_homepage()
+        self.new_form = Patient_homepage(self.email)
         self.new_form.show()
         self.close()
 
     def populate_doctor_appointment_table(self, patientID):
-    # Clear existing rows in the table
-        self.doctor_appointment_table.clearContents()
-        self.doctor_appointment_table.setRowCount(0)
-
         connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
         connection = pyodbc.connect(connection_string)
         
         self.patientID = patientID
+        print(self.patientID)
         # Create a cursor to interact with the database
         cursor = connection.cursor()
-        
+
+        # Clear existing rows and set row count to 0
+        self.doctor_appointment_table.clearContents()
+        self.doctor_appointment_table.setRowCount(0)
+
         # TODO: Write SQL query to fetch doctor appointment data with assigned pod
         cursor.execute("""
                     SELECT 
@@ -2552,7 +2551,10 @@ class patient_booked_appointments(QtWidgets.QMainWindow):
                 """, self.patientID)
 
         for row_index, row_data in enumerate(cursor.fetchall()):
+            # Append a new row
             self.doctor_appointment_table.insertRow(row_index)
+
+            # Populate the row with data
             for col_index, cell_data in enumerate(row_data):
                 item = QTableWidgetItem(str(cell_data))
                 item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable) 
@@ -2568,6 +2570,7 @@ class patient_booked_appointments(QtWidgets.QMainWindow):
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
+
 
 
 # 20editable patient history view by doctor only
