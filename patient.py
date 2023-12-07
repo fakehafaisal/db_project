@@ -6,8 +6,8 @@ import pyodbc
 from PyQt6.QtCore import Qt
 
 
-server = 'DESKTOP-HPUUN98\SPARTA'
-database = 'db_project'  # Name of your Northwind database
+server = 'M\SPARTA'
+database = 'basabkhatamproject'  # Name of your Northwind database
 use_windows_authentication = True  # Set to True to use Windows Authentication
 
 # 1main homepage
@@ -1524,7 +1524,7 @@ class Appointments_booking(QtWidgets.QMainWindow):
         status =''
         outcome = ''
         print(appointment_id, slot_id, cancel_appointment, patient_id, amount, payment_method_id, doctors_advice, is_admitted, room_num, status, outcome)
-        cursor.execute(sql_query, int(appointment_id), int(slot_id), cancel_appointment, int(patient_id), amount, int(payment_method_id), doctors_advice, is_admitted, int(room_num), status, outcome)
+        cursor.execute(sql_query, int(appointment_id), int(slot_id), cancel_appointment, int(patient_id), amount, int(payment_method_id), None, None, None, None, None)
         connection.commit()
         connection.close()
 
@@ -2519,7 +2519,7 @@ class patient_booked_appointments(QtWidgets.QMainWindow):
         self.pushButton.clicked.connect(self.backtohomepage)
 
 
-        self.populate_doctor_appointment_table(patientID)
+        # self.populate_doctor_appointment_table(patientID)
 
     def backtohomepage(self):
         self.new_form = Patient_homepage()
@@ -2621,31 +2621,41 @@ class editable_patient_history(QtWidgets.QMainWindow):
         self.listWidget_4.addItem(treatment)
         self.lineEdit.clear()
     
-    def changes_saved(self):
+    def insert_into_database(self):
+        
         connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
         connection = pyodbc.connect(connection_string)
-
+        
+        self.patientID
+        print("id = ", self.patientID)
         cursor = connection.cursor()
         
         cursor.execute("""
             SELECT count(appointment_id) from appointments_booked
             """)
         
-        current_appointment = cursor.fetchall()[0][0]+1
-        # print("app = ", current_appointment)
+        cursor.execute("""
+            SELECT TOP 1 appointment_id
+            FROM appointments_booked
+            WHERE patient_id = ?
+            ORDER BY appointment_id DESC; 
+            """,self.patientID)
+        
+        current_appointment = cursor.fetchall()[0][0]
+        print("app = ", current_appointment)
         
         if self.listWidget_4.item(0) is not None:
             doctorAdvice = self.listWidget_4.item(0).text()
             # print("advice = ",doctorAdvice)
         else:
-            doctorAdvice = 'none'
+            doctorAdvice = None
         if self.checkBox_6.isChecked():
             admitted = 1
             room = self.lineEdit_10.text()
             # print("room = ", room)
         else:
             admitted = 0
-            room = 0
+            room = None
         
         if self.radioButton_9.isChecked():
             status = 'Discharged'
@@ -2656,7 +2666,7 @@ class editable_patient_history(QtWidgets.QMainWindow):
         elif self.radioButton_8.isChecked():
             status = 'Death'
         else:
-            status = 'NULL'
+            status = None
             
         if self.radioButton_2.isChecked():
             outcome = 'Significant Improvement'
@@ -2669,13 +2679,14 @@ class editable_patient_history(QtWidgets.QMainWindow):
         elif self.radioButton_6.isChecked():
             outcome = 'Condition Worsened'
         else:
-            outcome = 'NULL'
+            outcome = None
         
         cursor.execute("""
-            INSERT INTO appointments_booked (appointment_id, slot_id, cancel_appointment, patient_id, amount, doctors_advice, is_admitted, room_num, status, outcome)
-            VALUES
-            (?, ?,0,?,700.00,?,?,?,?,?)
-            """,current_appointment,self.slotID,self.patientID,doctorAdvice,admitted,room,status,outcome)
+            UPDATE appointments_booked 
+            SET doctors_advice = ?, is_admitted= ?, room_num = ?, status = ?, outcome = ?
+            WHERE appointment_id = ?
+            """,doctorAdvice,admitted,room,status,outcome,current_appointment)
+
         
         
         # storing symptoms from list widget
@@ -2750,6 +2761,9 @@ class editable_patient_history(QtWidgets.QMainWindow):
         connection.close()
         
         
+    
+    def changes_saved(self,patientID):
+        self.insert_into_database()
         
         output=QMessageBox(self)              
         output.setWindowTitle("Patient Medical History") 
@@ -2758,6 +2772,152 @@ class editable_patient_history(QtWidgets.QMainWindow):
         output.setIcon(QMessageBox.Icon.Information) 
         button=output.exec()
         self.close()
+        # connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
+        # connection = pyodbc.connect(connection_string)
+        
+        # self.patientID = patientID
+        # print("id = ", self.patientID)
+        # cursor = connection.cursor()
+        
+        # cursor.execute("""
+        #     SELECT count(appointment_id) from appointments_booked
+        #     """)
+        
+        # cursor.execute("""
+        #     SELECT TOP 1 appointment_id
+        #     FROM appointments_booked
+        #     WHERE patient_id = ?
+        #     ORDER BY appointment_id DESC; 
+        #     """,self.patientID)
+        
+        # current_appointment = cursor.fetchall()
+        # print("app = ", current_appointment)
+        
+        # if self.listWidget_4.item(0) is not None:
+        #     doctorAdvice = self.listWidget_4.item(0).text()
+        #     # print("advice = ",doctorAdvice)
+        # else:
+        #     doctorAdvice = None
+        # if self.checkBox_6.isChecked():
+        #     admitted = 1
+        #     room = self.lineEdit_10.text()
+        #     # print("room = ", room)
+        # else:
+        #     admitted = 0
+        #     room = None
+        
+        # if self.radioButton_9.isChecked():
+        #     status = 'Discharged'
+        # elif self.radioButton_10.isChecked():
+        #     status = 'Lost for follow-Up'
+        # elif self.radioButton_11.isChecked():
+        #     status = 'Transfer'
+        # elif self.radioButton_8.isChecked():
+        #     status = 'Death'
+        # else:
+        #     status = None
+            
+        # if self.radioButton_2.isChecked():
+        #     outcome = 'Significant Improvement'
+        # elif self.radioButton_3.isChecked():
+        #     outcome = 'Moderate Improvement'
+        # elif self.radioButton_4.isChecked():
+        #     outcome = 'Mild Improvement'
+        # elif self.radioButton_5.isChecked():
+        #     outcome = 'No Change'
+        # elif self.radioButton_6.isChecked():
+        #     outcome = 'Condition Worsened'
+        # else:
+        #     outcome = None
+        
+        # cursor.execute("""
+        #     UPDATE appointments_booked 
+        #     SET doctors_advice = ?, is_admitted= ?, room_num = ?, status = ?, outcome = ?
+        #     WHERE appointment_id = ?
+        #     """,doctorAdvice,admitted,room,status,outcome,current_appointment)
+
+        
+        
+        # # storing symptoms from list widget
+        # for i in range(self.listWidget.count()):
+        #     symptom = self.listWidget.item(i).text()
+        #     # print(symptom)
+        #     cursor.execute("""
+        #     INSERT INTO patient_record_symptoms (appointment_id, symptoms)
+        #     VALUES
+        #     (?, ?)
+        #     """,current_appointment,symptom)
+            
+        # for i in range(self.listWidget_3.count()):
+        #     diagnosis = self.listWidget_3.item(i).text()
+        #     # print(diagnosis)
+        #     cursor.execute("""
+        #     INSERT INTO patient_record_diagnosis (appointment_id, diagnosis)
+        #     VALUES
+        #     (?, ?)
+        #     """,current_appointment,diagnosis)
+            
+        # for i in range(self.listWidget_2.count()):
+        #     allergies = self.listWidget_2.item(i).text()
+        #     # print(allergies)
+        #     cursor.execute("""
+        #     INSERT INTO patient_record_allergies (appointment_id, allergies)
+        #     VALUES
+        #     (?, ?)
+        #     """,current_appointment,allergies)
+            
+        # for i in range(1,self.listWidget_4.count()+1):
+        #     if self.listWidget_4.item(i) is not None:
+        #         medicines = self.listWidget_4.item(i).text()
+        #         # print(medicines)
+        #         cursor.execute("""
+        #         INSERT INTO prescriptions (appointment_id, medicine)
+        #         VALUES
+        #         (?, ?)
+        #         """,current_appointment,medicines)
+            
+        # if self.checkBox.isChecked():
+        #     reason = 'Counseling'
+        #     cursor.execute("""
+        #     INSERT INTO reason_for_visit (appointment_id, reason)
+        #     VALUES
+        #     (?, ?)
+        #     """,current_appointment,reason)
+        # if self.checkBox_4.isChecked():
+        #     reason = 'Psychotheraphy'
+        #     cursor.execute("""
+        #     INSERT INTO reason_for_visit (appointment_id, reason)
+        #     VALUES
+        #     (?, ?)
+        #     """,current_appointment,reason)
+        # if self.checkBox_5.isChecked():
+        #     reason = 'Regular Sessions'
+        #     cursor.execute("""
+        #     INSERT INTO reason_for_visit (appointment_id, reason)
+        #     VALUES
+        #     (?, ?)
+        #     """,current_appointment,reason)
+        # if self.lineEdit_19.text():
+        #     reason = self.lineEdit_19.text()
+        #     cursor.execute("""
+        #     INSERT INTO reason_for_visit (appointment_id, reason)
+        #     VALUES
+        #     (?, ?)
+        #     """,current_appointment,reason)
+            
+            
+        # connection.commit()
+        # connection.close()
+        
+        
+        
+        # output=QMessageBox(self)              
+        # output.setWindowTitle("Patient Medical History") 
+        # output.setText("Changes saved successfully!.")
+        # output.setStandardButtons( QMessageBox.StandardButton.Ok)
+        # output.setIcon(QMessageBox.Icon.Information) 
+        # button=output.exec()
+        # self.close()
         
     def populate_screen(self,patientID):
         self.patientID = patientID
@@ -2800,7 +2960,7 @@ class editable_patient_history(QtWidgets.QMainWindow):
             GROUP BY P.patient_id
         """, patientID)
 
-        current_visit_no = cursor.fetchall()[0][1]+1
+        current_visit_no = cursor.fetchall()[0][1]
         self.lineEdit_8.setText(str(current_visit_no))
                 
         # Close the database connection
