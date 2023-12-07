@@ -345,6 +345,9 @@
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>30</x>
@@ -361,6 +364,9 @@
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBox_4">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>30</x>
@@ -377,6 +383,9 @@
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBox_5">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>30</x>
@@ -406,6 +415,9 @@
      <string>Change in patient status</string>
     </property>
     <widget class="QRadioButton" name="radioButton_2">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -422,6 +434,9 @@
      </property>
     </widget>
     <widget class="QRadioButton" name="radioButton_3">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -438,6 +453,9 @@
      </property>
     </widget>
     <widget class="QRadioButton" name="radioButton_4">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -454,6 +472,9 @@
      </property>
     </widget>
     <widget class="QRadioButton" name="radioButton_5">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -470,6 +491,9 @@
      </property>
     </widget>
     <widget class="QRadioButton" name="radioButton_6">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -525,6 +549,9 @@
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBox_6">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -541,6 +568,9 @@
      </property>
     </widget>
     <widget class="QRadioButton" name="radioButton_10">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>30</x>
@@ -557,6 +587,9 @@
      </property>
     </widget>
     <widget class="QRadioButton" name="radioButton_11">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>30</x>
@@ -573,6 +606,9 @@
      </property>
     </widget>
     <widget class="QRadioButton" name="radioButton_8">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>30</x>
@@ -589,6 +625,9 @@
      </property>
     </widget>
     <widget class="QRadioButton" name="radioButton_9">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>30</x>

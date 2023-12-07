@@ -6,8 +6,8 @@ import pyodbc
 from PyQt6.QtCore import Qt
 
 
-server = 'DESKTOP-HPUUN98\SPARTA'
-database = 'db_project'  # Name of your Northwind database
+server = 'M\SPARTA'
+database = 'basabkhatamproject'  # Name of your Northwind database
 use_windows_authentication = True  # Set to True to use Windows Authentication
 
 # 1main homepage
@@ -435,13 +435,13 @@ class ViewBook4(QtWidgets.QMainWindow):
             self.insert_doc_details()
             output=QMessageBox(self)              
             output.setWindowTitle("Sign up Sucessful.") 
-            output.setText("Account awaiting Admin Approval.")
+            output.setText("Successfully Signed Up!")
             output.setStandardButtons( QMessageBox.StandardButton.Ok)
             output.setIcon(QMessageBox.Icon.Information) 
             button=output.exec()
-            # self.new_form = ViewBook3()
-            # self.new_form.show()
-            # self.close()
+            self.new_form = ViewBook3()
+            self.new_form.show()
+            self.close()
 
 
     def doc_cancel(self):
@@ -561,12 +561,12 @@ class Doctor_homepage(QtWidgets.QMainWindow):
         self.close()
 
     def appointment_list(self):
-        self.new_form = Appointments(self.doctorID)
+        self.new_form = Appointments(self.doctorID,self.login_email)
         self.new_form.show()
         self.close()
 
     def patient_details(self):
-        self.new_form = Patient_Records("doctor")
+        self.new_form = Patient_Records("doctor",self.login_email)
         self.new_form.show()
         self.close()
 
@@ -615,7 +615,7 @@ class Patient_homepage(QtWidgets.QMainWindow):
 
 # 9patient list
 class Patient_Records(QtWidgets.QMainWindow):  
-    def __init__(self,user):
+    def __init__(self,user,login_email):
         super(Patient_Records, self).__init__() 
         uic.loadUi('patient_records.ui', self) 
         self.setWindowTitle("Patient List")
@@ -626,6 +626,7 @@ class Patient_Records(QtWidgets.QMainWindow):
 
         self.show()
         self.user = user
+        self.login_email = login_email
         # print(self.user)
         
         self.search_patient.clicked.connect(self.search_pat)
@@ -643,7 +644,7 @@ class Patient_Records(QtWidgets.QMainWindow):
             self.new_form1.show()
       
         elif self.user == 'doctor':
-            self.new_form2 = Doctor_homepage("doctor")
+            self.new_form2 = Doctor_homepage("doctor",self.login_email)
             self.new_form2.show()
       
         self.close()
@@ -984,7 +985,7 @@ class Patient_History(QtWidgets.QMainWindow):
 
 # 11appointment list
 class Appointments(QtWidgets.QMainWindow):  
-    def __init__(self,doctorID):
+    def __init__(self,doctorID,login_email):
         super(Appointments, self).__init__() 
         uic.loadUi('updated_appointments.ui', self) 
         self.setWindowTitle("Appointments List")
@@ -996,6 +997,7 @@ class Appointments(QtWidgets.QMainWindow):
         self.show()
         
         self.doctorID = doctorID
+        self.login_email = login_email
         
         self.search_app.clicked.connect(self.search_appointments)
         self.back_to_doc_home.clicked.connect(self.backtohome)
@@ -1021,7 +1023,7 @@ class Appointments(QtWidgets.QMainWindow):
         self.close()
 
     def backtohome(self):
-        self.new_form = Doctor_homepage("doctor")
+        self.new_form = Doctor_homepage("doctor",self.login_email)
         self.new_form.show()
         self.close()
         
