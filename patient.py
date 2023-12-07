@@ -6,8 +6,8 @@ import pyodbc
 from PyQt6.QtCore import Qt
 
 
-server = 'M\SPARTA'
-database = 'basabkhatamproject'  # Name of your Northwind database
+server = 'DESKTOP-HPUUN98\SPARTA'
+database = 'db_project'  # Name of your Northwind database
 use_windows_authentication = True  # Set to True to use Windows Authentication
 
 # 1main homepage
@@ -1242,6 +1242,7 @@ class Appointments_booking(QtWidgets.QMainWindow):
         output=QMessageBox(self)              
         output.setWindowTitle("Appointment") 
         output.setText("Your appointment has been successfully booked!.")
+        self.insert_appointment_details()
         output.setStandardButtons( QMessageBox.StandardButton.Ok)
         output.setIcon(QMessageBox.Icon.Information) 
         button=output.exec()
@@ -1474,7 +1475,50 @@ class Appointments_booking(QtWidgets.QMainWindow):
 
             # Close the database connection
             connection.close()
+    def insert_appointment_details(self):
+        
+        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
+        connection = pyodbc.connect(connection_string)
+        cursor = connection.cursor()
 
+        sql_query = """
+            INSERT INTO appointments_booked
+            ([appointment_id], [slot_id], [cancel_appointment], [patient_id], [amount], [payment_method_id], [doctors_advice], [is_admitted],[room_num], [status],[outcome])
+            VALUES (?,?,?,?,?,?,?,?,?,?,?)
+        """
+
+        cursor.execute("""SELECT MAX(appointment_id) AS appointment_id FROM appointments_booked""")
+        result = cursor.fetchone()
+        appointment_id = result[0] + 1
+
+        year = self.comboBox_2.currentText()
+        month = self.comboBox_4.currentText()
+        dateday = self.comboBox_5.currentText()
+        time = self.comboBox_3.currentText().split('-')[0]
+
+        cursor.execute("""
+            SELECT slot_id
+            FROM slots_available
+            WHERE year = ? AND month = ? AND dateday = ? AND start_time = ?
+        """, year, month, dateday, time)
+
+        slot_id = cursor.fetchone()[0]  # Fetch the first column of the result
+
+        cancel_appointment = 0
+        patient_id = 32
+        amount = 0
+        payment_method_id = 0
+        doctors_advice = ''
+        is_admitted = 0
+        room_num = 0
+        status =''
+        outcome = ''
+
+        cursor.execute(sql_query, int(appointment_id), int(slot_id), cancel_appointment, int(patient_id), amount, int(payment_method_id), doctors_advice, is_admitted, int(room_num), status, outcome)
+        connection.commit()
+        connection.close()
+
+        
 # 14patient history private veiw for patient
 class Private_view_patient(QtWidgets.QMainWindow):  
     def __init__(self, email):

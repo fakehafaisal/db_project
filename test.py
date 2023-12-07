@@ -29,3 +29,5 @@ emergency_contact = "NULL"
 cursor.execute(sql_query, (patient_id,first_name,last_name, email, password, DOB, gender_id, phone_num, is_admitted,emergency_contact))
 connection.commit()
 connection.close()
+
+#comment here
