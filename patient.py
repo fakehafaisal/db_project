@@ -6,7 +6,7 @@ import pyodbc
 from PyQt6.QtCore import Qt
 
 
-server = 'DESKTOP-2TB3VB3\SPARTA'
+server = 'DESKTOP-HPUUN98\SPARTA'
 database = 'db_project'  # Name of your Northwind database
 use_windows_authentication = True  # Set to True to use Windows Authentication
 
@@ -675,14 +675,14 @@ class Patient_Records(QtWidgets.QMainWindow):
                 DOB,
                 contact
             FROM patients
-            WHERE first_name LIKE ? OR last_name LIKE ?;
+            WHERE first_name LIKE ? OR last_name LIKE ? OR first_name + ' ' + last_name LIKE ?;
         """
 
         connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
         connection = pyodbc.connect(connection_string)
 
         cursor = connection.cursor()
-        cursor.execute(query, ('%' + inputname + '%', '%' + inputname + '%'))
+        cursor.execute(query, ('%' + inputname + '%', '%' + inputname + '%', '%' + inputname + '%'))
 
         # Clear the table before populating with new data
         self.tableWidget.clear()
@@ -2464,14 +2464,14 @@ class payment_details(QtWidgets.QMainWindow):
             JOIN patients ON appointments_booked.patient_id = patients.patient_id
             JOIN payment_method ON appointments_booked.payment_method_id = payment_method.payment_method_id
             JOIN slots_available ON slots_available.slot_id = appointments_booked.slot_id
-            WHERE patients.first_name LIKE ? OR patients.last_name LIKE ?;
+            WHERE patients.first_name LIKE ? OR patients.last_name LIKE ? OR patients.first_name + ' ' + patients.last_name LIKE ?;
         """
 
         connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
         connection = pyodbc.connect(connection_string)
 
         cursor = connection.cursor()
-        cursor.execute(query, ('%' + name_input + '%', '%' + name_input + '%'))
+        cursor.execute(query, ('%' + name_input + '%', '%' + name_input + '%', '%' + name_input + '%'))
 
         # Clear the table before populating with new data
         self.tableWidget.clear()
@@ -2492,7 +2492,6 @@ class patient_booked_appointments(QtWidgets.QMainWindow):
     def __init__(self, email):
         super(patient_booked_appointments, self).__init__() 
         uic.loadUi('app_booked(patient).ui', self) 
-        # ... (other initialization code)
 
         self.show()
         self.email = email
@@ -2508,6 +2507,7 @@ class patient_booked_appointments(QtWidgets.QMainWindow):
         result = cursor.fetchall()
 
         if result:
+            # Ensure that patientID is defined before using it
             patientID = result[0][0]
             self.populate_doctor_appointment_table(patientID)
         else:
@@ -2516,6 +2516,7 @@ class patient_booked_appointments(QtWidgets.QMainWindow):
 
         self.pushButton.clicked.connect(self.backtohomepage)
 
+
         self.populate_doctor_appointment_table(patientID)
 
     def backtohomepage(self):
@@ -2523,7 +2524,11 @@ class patient_booked_appointments(QtWidgets.QMainWindow):
         self.new_form.show()
         self.close()
 
-    def populate_doctor_appointment_table(self,patientID):
+    def populate_doctor_appointment_table(self, patientID):
+    # Clear existing rows in the table
+        self.doctor_appointment_table.clearContents()
+        self.doctor_appointment_table.setRowCount(0)
+
         connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
         connection = pyodbc.connect(connection_string)
         
@@ -2538,12 +2543,11 @@ class patient_booked_appointments(QtWidgets.QMainWindow):
                         d.assigned_pod AS doctor_assigned_pod,
                         s.day AS appointment_day,
                         FORMAT(CONVERT(datetime, s.year + '-' + s.month + '-' + s.dateday), 'dd/MM/yyyy') AS appointment_date, 
-                       CONVERT(VARCHAR, s.start_time, 108) AS appointment_start_time
+                        CONVERT(VARCHAR, s.start_time, 108) AS appointment_start_time
                     FROM appointments_booked a
                     JOIN slots_available s ON a.slot_id = s.slot_id
                     JOIN doctor d ON d.doctor_id = s.doctor_id where patient_id = ?;
-                """,self.patientID)
-
+                """, self.patientID)
 
         for row_index, row_data in enumerate(cursor.fetchall()):
             self.doctor_appointment_table.insertRow(row_index)
@@ -2562,6 +2566,7 @@ class patient_booked_appointments(QtWidgets.QMainWindow):
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
+
 
 # 20editable patient history view by doctor only
 class editable_patient_history(QtWidgets.QMainWindow):  
