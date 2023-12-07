@@ -1002,9 +1002,10 @@ class Appointments(QtWidgets.QMainWindow):
         
         self.search_app.clicked.connect(self.search_appointments)
         self.back_to_doc_home.clicked.connect(self.backtohome)
-
+        self.populate_comboBox()
         self.view_app_details.clicked.connect(self.appointment_expanded)
         self.populate_appointment_table()
+        self.comboBox.currentIndexChanged.connect(self.populate_table)
 
     def appointment_expanded(self):
         chosen_row = self.apptable.currentRow()
@@ -1096,7 +1097,32 @@ class Appointments(QtWidgets.QMainWindow):
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+    def populate_comboBox(self):
+        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
+        connection = pyodbc.connect(connection_string)
+        cursor = connection.cursor()
+        cursor.execute("""
+                        select first_name+' '+last_name from doctor
+                    """)
+        doctor_names = cursor.fetchall()
 
+            # Populate the ComboBox with doctor names
+        for doctor_name in doctor_names:
+            self.comboBox.addItem(str(doctor_name[0]))
+
+        connection.close()
+    def populate_table(self):
+        selected_doctor = self.comboBox.currentText()
+
+        # Iterate through rows in the table and show only those matching the selected doctor
+        for row_index in range(self.apptable.rowCount()):
+            doctor_name_item = self.apptable.item(row_index, 1)  # Replace with the actual column index
+            if doctor_name_item is not None and doctor_name_item.text() == selected_doctor:
+                self.apptable.showRow(row_index)
+            else:
+                self.apptable.hideRow(row_index)
+
+        
 
 # 12expanded appointment details
 class Appointments_details(QtWidgets.QMainWindow):  
@@ -1259,7 +1285,7 @@ class Appointments_booking(QtWidgets.QMainWindow):
             
             cursor = connection.cursor()
             cursor.execute("""
-                        SELECT first_name+' '+last_name as doctor_name from doctor
+                        SELECT first_name+' '+last_name from doctor
 
                     """)
             
