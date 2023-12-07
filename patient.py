@@ -716,7 +716,7 @@ class Patient_Records(QtWidgets.QMainWindow):
             # print(firstname,p_contact)
             
             
-        self.new_form = Patient_History(self.user,firstname,p_contact)
+        self.new_form = Patient_History(self.user,firstname,p_contact, self.login_email)
         self.new_form.show()
         self.close()
 
@@ -789,7 +789,7 @@ class Patient_Records(QtWidgets.QMainWindow):
     
 # 10expanded patient history
 class Patient_History(QtWidgets.QMainWindow):  
-    def __init__(self,user,firstname,p_contact):
+    def __init__(self,user,firstname,p_contact, login_email):
         super(Patient_History, self).__init__() 
         uic.loadUi('patient_details.ui', self) 
         self.setWindowTitle("Patient History")
@@ -802,6 +802,7 @@ class Patient_History(QtWidgets.QMainWindow):
 
         self.show()
         self.user = user
+        self.login_email = login_email
 
         self.back_to_rec.clicked.connect(self.back_to_list)
         
@@ -826,7 +827,7 @@ class Patient_History(QtWidgets.QMainWindow):
         # self.checkBox_6.clear()
 
     def back_to_list(self):
-        self.new_form = Patient_Records(self.user)
+        self.new_form = Patient_Records(self.user, self.login_email)
         self.new_form.show()
         self.close()
         
@@ -1076,7 +1077,7 @@ class Appointments(QtWidgets.QMainWindow):
             cancelled=eval(self.apptable.item(chosen_row, 4).text())
             # print(name,time,day,cancelled)
 
-        self.new_form = Appointments_details(name, time, day, cancelled,doctor)
+        self.new_form = Appointments_details(name, time, day, cancelled,doctor, self.doctorID, self.login_email)
         self.new_form.show()
         self.close()
 
@@ -1183,7 +1184,7 @@ class Appointments(QtWidgets.QMainWindow):
 
 # 12expanded appointment details
 class Appointments_details(QtWidgets.QMainWindow):  
-    def __init__(self, name, time, day, cancelled,doctor):
+    def __init__(self, name, time, day, cancelled,doctor, DoctorID, login_email):
         super(Appointments_details, self).__init__() 
         uic.loadUi('appointment_details.ui', self) 
         self.setWindowTitle("Appointment Details")
@@ -1200,6 +1201,8 @@ class Appointments_details(QtWidgets.QMainWindow):
         self.show()
         
         self.doctor = doctor
+        self.DoctorID = DoctorID
+        self.login_email = login_email
 
         self.back_to_app_list.clicked.connect(self.back_to_applist)
         
@@ -1279,7 +1282,7 @@ class Appointments_details(QtWidgets.QMainWindow):
 
         
     def back_to_applist(self):
-        self.new_form = Appointments()
+        self.new_form = Appointments(self.DoctorID, self.login_email)
         self.new_form.show()
         self.close()
 
@@ -1320,7 +1323,7 @@ class Appointments_booking(QtWidgets.QMainWindow):
 
     def backtobooking(self):
     # Create an instance of Patient_homepage by passing the email parameter
-        self.new_form = Patient_homepage()
+        self.new_form = Patient_homepage(self.login_email)
         self.new_form.show()
         self.close()
 
@@ -1332,7 +1335,7 @@ class Appointments_booking(QtWidgets.QMainWindow):
         output.setStandardButtons( QMessageBox.StandardButton.Ok)
         output.setIcon(QMessageBox.Icon.Information) 
         button=output.exec()
-        self.new_form = Patient_homepage()
+        self.new_form = Patient_homepage(self.login_email)
         self.new_form.show()
         self.close()
         
@@ -1342,7 +1345,7 @@ class Appointments_booking(QtWidgets.QMainWindow):
             
             cursor = connection.cursor()
             cursor.execute("""
-                        SELECT first_name+' '+last_name from doctor
+                        SELECT first_name+' '+last_name as doctor_name from doctor
 
                     """)
             
@@ -2171,7 +2174,7 @@ class doctors_list(QtWidgets.QMainWindow):
             assigned_pod = self.tableWidget.item(chosen_row, 3).text()
             gender = self.tableWidget.item(chosen_row, 1).text()
 
-            self.new_form = doctor_details(name, assigned_pod, gender)
+            self.new_form = doctor_details(name, assigned_pod, gender, self.login_email)
             self.new_form.show()
             self.close()
     
@@ -2281,7 +2284,7 @@ class doctors_list(QtWidgets.QMainWindow):
 
 # 17expanded doctor details
 class doctor_details(QtWidgets.QMainWindow):  
-    def __init__(self, name, assigned_pod, gender):
+    def __init__(self, name, assigned_pod, gender, login_email):
         super(doctor_details, self).__init__() 
         uic.loadUi('Doctor_details.ui', self) 
         self.setWindowTitle("Doctor Details")
@@ -2295,6 +2298,7 @@ class doctor_details(QtWidgets.QMainWindow):
         self.setFixedSize(self.width, self.height)
 
         self.show()
+        self.login_email = login_email
 
         self.back_to_doclist.clicked.connect(self.doc_list_back)
         self.populate_listWidget(name)
@@ -2310,7 +2314,7 @@ class doctor_details(QtWidgets.QMainWindow):
         self.populate_timings()
 
     def doc_list_back(self):
-        self.new_form = doctors_list()
+        self.new_form = doctors_list(self.login_email)
         self.new_form.show()
         self.close()
 
