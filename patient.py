@@ -6,8 +6,8 @@ import pyodbc
 from PyQt6.QtCore import Qt
 
 
-server = 'M\SPARTA'
-database = 'basabkhatamproject'  # Name of your Northwind database
+server = 'DESKTOP-HPUUN98\SPARTA'
+database = 'db_project'  # Name of your Northwind database
 use_windows_authentication = True  # Set to True to use Windows Authentication
 
 # 1main homepage
@@ -330,7 +330,7 @@ class ViewBook3(QtWidgets.QMainWindow):
 
             elif (self.radioButton_3.isChecked()==True):
                 if self.verifyAdminCredentials(login_email, login_password):
-                    self.new_form = Admin_homepage("admin") 
+                    self.new_form = Admin_homepage("admin",login_email) 
                     self.new_form.show()
                     self.close()
                 else:
@@ -481,7 +481,7 @@ class ViewBook4(QtWidgets.QMainWindow):
         connection.close()
 # 6admin homepage
 class Admin_homepage(QtWidgets.QMainWindow):  
-    def __init__(self,user):
+    def __init__(self,user,login_email):
         super(Admin_homepage, self).__init__() 
         uic.loadUi('adminhomepage.ui', self) 
         self.setWindowTitle("Admin Homepage")
@@ -492,6 +492,7 @@ class Admin_homepage(QtWidgets.QMainWindow):
 
         print(user)
         self.show()
+        self.login_email = login_email
 
         self.logout_admin.clicked.connect(self.admin_logout)
 
@@ -508,17 +509,17 @@ class Admin_homepage(QtWidgets.QMainWindow):
         self.close()
 
     def admin_doc_view(self):
-        self.new_form = doctors_list()
+        self.new_form = doctors_list(self.login_email)
         self.new_form.show()
         self.close()
 
     def admin_patient_view(self):
-        self.new_form = Patient_Records("admin")
+        self.new_form = Patient_Records("admin", self.login_email)
         self.new_form.show()
         self.close()
 
     def view_payments(self):
-        self.new_form = payment_details()
+        self.new_form = payment_details(self.login_email)
         self.new_form.show()
         self.close()
 
@@ -640,7 +641,7 @@ class Patient_Records(QtWidgets.QMainWindow):
     def back_to_dochome(self):
         if self.user == 'admin':
             print('line460')
-            self.new_form1 = Admin_homepage("admin") 
+            self.new_form1 = Admin_homepage("admin",self.login_email) 
             self.new_form1.show()
       
         elif self.user == 'doctor':
@@ -1997,7 +1998,7 @@ class app_view_doc(QtWidgets.QMainWindow):
 
 # 16doctor list
 class doctors_list(QtWidgets.QMainWindow):  
-    def __init__(self):
+    def __init__(self, login_email):
         super(doctors_list, self).__init__() 
         uic.loadUi('Doctors_list.ui', self) 
         self.setWindowTitle("Doctors List")
@@ -2005,6 +2006,7 @@ class doctors_list(QtWidgets.QMainWindow):
         self.width = self.frameGeometry().width()
         self.height = self.frameGeometry().height()
         self.setFixedSize(self.width, self.height)
+        self.login_email = login_email
 
         self.show()
 
@@ -2030,7 +2032,7 @@ class doctors_list(QtWidgets.QMainWindow):
             self.close()
     
     def go_back_adminhome(self):
-        self.new_form = Admin_homepage('admin')
+        self.new_form = Admin_homepage('admin', self.login_email)
         self.new_form.show()
         self.close()
 
@@ -2388,7 +2390,7 @@ class doctor_details(QtWidgets.QMainWindow):
 
 # 18payment screen
 class payment_details(QtWidgets.QMainWindow):  
-    def __init__(self):
+    def __init__(self, login_email):
         super(payment_details, self).__init__() 
         uic.loadUi('payment_admin.ui', self) 
         self.setWindowTitle("Payment Details Page")
@@ -2398,6 +2400,7 @@ class payment_details(QtWidgets.QMainWindow):
         self.setFixedSize(self.width, self.height)
         
         self.show()
+        self.login_email = login_email
 
         self.search_payment.clicked.connect(self.search_pay)
 
@@ -2406,7 +2409,7 @@ class payment_details(QtWidgets.QMainWindow):
         self.populate_table()
 
     def back_to_adminhome(self):
-        self.new_form = Admin_homepage("admin")
+        self.new_form = Admin_homepage("admin", self.login_email)
         self.new_form.show()
         self.close()
         
@@ -2480,15 +2483,11 @@ class payment_details(QtWidgets.QMainWindow):
         connection.close()
 
 # 19patient can view their own appointments
-class patient_booked_appointments(QtWidgets.QMainWindow):  
-    def __init__(self,email):
+class patient_booked_appointments(QtWidgets.QMainWindow):
+    def __init__(self, email):
         super(patient_booked_appointments, self).__init__() 
         uic.loadUi('app_booked(patient).ui', self) 
-        self.setWindowTitle("My Booked Appointments")
-
-        self.width = self.frameGeometry().width()
-        self.height = self.frameGeometry().height()
-        self.setFixedSize(self.width, self.height)
+        # ... (other initialization code)
 
         self.show()
         self.email = email
@@ -2499,9 +2498,16 @@ class patient_booked_appointments(QtWidgets.QMainWindow):
         # Create a cursor to interact with the database
         cursor = connection.cursor()
         
-        # TODO: Write SQL query to fetch doctor appointment data with assigned pod
-        cursor.execute("""select patient_id from patients where email = ?""",self.email)
-        patientID = cursor.fetchall()[0][0]
+        # Fetch patient ID
+        cursor.execute("""select patient_id from patients where email = ?""", self.email)
+        result = cursor.fetchall()
+
+        if result:
+            patientID = result[0][0]
+            self.populate_doctor_appointment_table(patientID)
+        else:
+            # Handle the case where no patient ID is found for the given email
+            print("Patient ID not found for email:", self.email)
 
         self.pushButton.clicked.connect(self.backtohomepage)
 
