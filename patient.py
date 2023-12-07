@@ -2568,17 +2568,17 @@ class editable_patient_history(QtWidgets.QMainWindow):
             """)
         
         current_appointment = cursor.fetchall()[0][0]+1
-        print("app = ", current_appointment)
+        # print("app = ", current_appointment)
         
         if self.listWidget_4.item(0) is not None:
             doctorAdvice = self.listWidget_4.item(0).text()
-            print("advice = ",doctorAdvice)
+            # print("advice = ",doctorAdvice)
         else:
             doctorAdvice = 'none'
         if self.checkBox_6.isChecked():
             admitted = 1
             room = self.lineEdit_10.text()
-            print("room = ", room)
+            # print("room = ", room)
         else:
             admitted = 0
             room = 0
@@ -2617,7 +2617,7 @@ class editable_patient_history(QtWidgets.QMainWindow):
         # storing symptoms from list widget
         for i in range(self.listWidget.count()):
             symptom = self.listWidget.item(i).text()
-            print(symptom)
+            # print(symptom)
             cursor.execute("""
             INSERT INTO patient_record_symptoms (appointment_id, symptoms)
             VALUES
@@ -2626,7 +2626,7 @@ class editable_patient_history(QtWidgets.QMainWindow):
             
         for i in range(self.listWidget_3.count()):
             diagnosis = self.listWidget_3.item(i).text()
-            print(diagnosis)
+            # print(diagnosis)
             cursor.execute("""
             INSERT INTO patient_record_diagnosis (appointment_id, diagnosis)
             VALUES
@@ -2635,7 +2635,7 @@ class editable_patient_history(QtWidgets.QMainWindow):
             
         for i in range(self.listWidget_2.count()):
             allergies = self.listWidget_2.item(i).text()
-            print(allergies)
+            # print(allergies)
             cursor.execute("""
             INSERT INTO patient_record_allergies (appointment_id, allergies)
             VALUES
@@ -2645,7 +2645,7 @@ class editable_patient_history(QtWidgets.QMainWindow):
         for i in range(1,self.listWidget_4.count()+1):
             if self.listWidget_4.item(i) is not None:
                 medicines = self.listWidget_4.item(i).text()
-                print(medicines)
+                # print(medicines)
                 cursor.execute("""
                 INSERT INTO prescriptions (appointment_id, medicine)
                 VALUES

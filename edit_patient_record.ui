@@ -868,19 +868,6 @@
      <string>Visit Number:</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="back">
-    <property name="geometry">
-     <rect>
-      <x>910</x>
-      <y>560</y>
-      <width>101</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Back</string>
-    </property>
-   </widget>
    <widget class="QGroupBox" name="groupBox_9">
     <property name="geometry">
      <rect>
