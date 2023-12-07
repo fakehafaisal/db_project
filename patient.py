@@ -6,8 +6,8 @@ import pyodbc
 from PyQt6.QtCore import Qt
 
 
-server = 'M\SPARTA'
-database = 'basabkhatamproject'  # Name of your Northwind database
+server = 'DESKTOP-HPUUN98\SPARTA'
+database = 'db_project'  # Name of your Northwind database
 use_windows_authentication = True  # Set to True to use Windows Authentication
 
 # 1main homepage
@@ -1044,14 +1044,15 @@ class Appointments(QtWidgets.QMainWindow):
             JOIN appointments_booked a ON p.patient_id = a.patient_id
             JOIN slots_available s ON s.slot_id = a.slot_id
             JOIN doctor d ON d.doctor_id = s.doctor_id
-            WHERE p.first_name LIKE ? OR p.last_name LIKE ?;
+            WHERE p.first_name LIKE ? OR p.last_name LIKE ? OR p.first_name + ' ' + p.last_name LIKE ?;
         """
 
         connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
         connection = pyodbc.connect(connection_string)
 
         cursor = connection.cursor()
-        cursor.execute(query, ('%' + name_input + '%', '%' + name_input + '%'))
+        cursor.execute(query, ('%' + name_input + '%', '%' + name_input + '%', '%' + name_input + '%'))
+
 
         # Clear the table before populating with new data
         self.apptable.clear()
