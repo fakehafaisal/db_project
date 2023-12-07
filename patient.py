@@ -6,7 +6,7 @@ import pyodbc
 from PyQt6.QtCore import Qt
 
 
-server = 'DESKTOP-HPUUN98\SPARTA'
+server = 'DESKTOP-2TB3VB3\SPARTA'
 database = 'db_project'  # Name of your Northwind database
 use_windows_authentication = True  # Set to True to use Windows Authentication
 
@@ -604,7 +604,7 @@ class Patient_homepage(QtWidgets.QMainWindow):
         self.close()
     
     def book_appointment(self):
-        self.new_form = Appointments_booking()
+        self.new_form = Appointments_booking(self.email)
         self.new_form.show()
         self.close()
 
@@ -1206,7 +1206,7 @@ class Appointments_details(QtWidgets.QMainWindow):
         
 # 13slots available booking
 class Appointments_booking(QtWidgets.QMainWindow):  
-    def __init__(self):
+    def __init__(self,login_email):
         super(Appointments_booking, self).__init__() 
         uic.loadUi('patientappointment.ui', self) 
         self.setWindowTitle("Slots Available")
@@ -1220,7 +1220,7 @@ class Appointments_booking(QtWidgets.QMainWindow):
         self.back_to_booking.clicked.connect(self.backtobooking)
 
         self.booking_done.clicked.connect(self.app_booked)
-
+        self.login_email=login_email
         self.populate_combobox()
         self.comboBox.currentIndexChanged.connect(self.populate_listWidget)
         self.comboBox.currentIndexChanged.connect(self.populate_comboBox_2)
@@ -1241,11 +1241,11 @@ class Appointments_booking(QtWidgets.QMainWindow):
         self.new_form.show()
         self.close()
 
-    def app_booked(self):
+    def app_booked(self,login_email):
         output=QMessageBox(self)              
         output.setWindowTitle("Appointment") 
         output.setText("Your appointment has been successfully booked!.")
-        self.insert_appointment_details()
+        self.insert_appointment_details(login_email)
         output.setStandardButtons( QMessageBox.StandardButton.Ok)
         output.setIcon(QMessageBox.Icon.Information) 
         button=output.exec()
@@ -1478,7 +1478,7 @@ class Appointments_booking(QtWidgets.QMainWindow):
 
             # Close the database connection
             connection.close()
-    def insert_appointment_details(self):
+    def insert_appointment_details(self,login_email):
         
         connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
         connection = pyodbc.connect(connection_string)
@@ -1508,8 +1508,13 @@ class Appointments_booking(QtWidgets.QMainWindow):
         slot_id = cursor.fetchone()[0]  # Fetch the first column of the result
 
         cancel_appointment = 0
-        patient_id = 32
-        amount = 0
+        
+        cursor.execute(
+        """select patient_id where email = ?
+        """, login_email
+        )
+        patient_id = cursor.fetchone()[0]
+        amount = 700
         payment_method_id = 0
         doctors_advice = ''
         is_admitted = 0
