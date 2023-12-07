@@ -1241,11 +1241,11 @@ class Appointments_booking(QtWidgets.QMainWindow):
         self.new_form.show()
         self.close()
 
-    def app_booked(self,login_email):
+    def app_booked(self):
         output=QMessageBox(self)              
         output.setWindowTitle("Appointment") 
         output.setText("Your appointment has been successfully booked!.")
-        self.insert_appointment_details(login_email)
+        self.insert_appointment_details(self.login_email)
         output.setStandardButtons( QMessageBox.StandardButton.Ok)
         output.setIcon(QMessageBox.Icon.Information) 
         button=output.exec()
@@ -1483,6 +1483,8 @@ class Appointments_booking(QtWidgets.QMainWindow):
         connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
         connection = pyodbc.connect(connection_string)
         cursor = connection.cursor()
+        #print(appointment_id, slot_id, cancel_appointment, patient_id, amount, payment_method_id, doctors_advice, is_admitted, room_num, status, outcome)
+     
 
         sql_query = """
             INSERT INTO appointments_booked
@@ -1510,18 +1512,18 @@ class Appointments_booking(QtWidgets.QMainWindow):
         cancel_appointment = 0
         
         cursor.execute(
-        """select patient_id where email = ?
-        """, login_email
+        """select patient_id from patients where email = ?
+        """, self.login_email
         )
         patient_id = cursor.fetchone()[0]
         amount = 700
-        payment_method_id = 0
+        payment_method_id = 2
         doctors_advice = ''
         is_admitted = 0
         room_num = 0
         status =''
         outcome = ''
-
+        print(appointment_id, slot_id, cancel_appointment, patient_id, amount, payment_method_id, doctors_advice, is_admitted, room_num, status, outcome)
         cursor.execute(sql_query, int(appointment_id), int(slot_id), cancel_appointment, int(patient_id), amount, int(payment_method_id), doctors_advice, is_admitted, int(room_num), status, outcome)
         connection.commit()
         connection.close()
