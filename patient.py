@@ -636,8 +636,64 @@ class Patient_Records(QtWidgets.QMainWindow):
         self.back_button.clicked.connect(self.back_to_dochome)
 
         self.view_button.clicked.connect(self.patient_history)
+        
+        self.view_button_2.clicked.connect(self.delete_patient)
 
         self.populate_table()
+        
+    def delete_patient(self):
+        chosen_row = self.tableWidget.currentRow()
+        if chosen_row>=0:
+            name = self.tableWidget.item(chosen_row, 0).text()
+            # assigned_pod = self.tableWidget.item(chosen_row, 3).text()
+            contact = self.tableWidget.item(chosen_row, 4).text()
+        
+        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
+        connection = pyodbc.connect(connection_string)
+        cursor = connection.cursor()
+        
+        cursor.execute("""
+                SELECT patient_id from patients
+                WHERE first_name + ' ' +last_name = ? and contact = ?
+            """, name, contact)
+        
+        patientID = cursor.fetchall()[0][0]
+        
+        try:
+            # Connect to the database
+            connection = pyodbc.connect(connection_string)
+            cursor = connection.cursor()
+
+            # Attempt to execute the delete query
+            cursor.execute("""
+                DELETE FROM patients
+                WHERE patient_id = ?
+            """, patientID)
+
+            # Commit the changes
+            connection.commit()
+
+            # Display a success message
+            QMessageBox.information(self, "Deletion Successful", "Patient deleted successfully")
+            self.tableWidget.clear()
+            self.populate_table()
+
+        except pyodbc.Error as e:
+            # Print the full exception details for debugging
+            print("Exception:", e)
+
+            # Handle referential integrity error (error number 547)
+            # if e.args[0] == 547:
+                # Display an error message
+            QMessageBox.warning(self, "Deletion Error", "Referential integrity error. The patient cannot be deleted.")
+            # else:
+            #     # Handle other database errors
+            #     print("Database error:", e)
+            #     QMessageBox.critical(self, "Database Error", "An error occurred while deleting the appointment.")
+
+        finally:
+            # Close the database connection
+            connection.close()
 
     def back_to_dochome(self):
         if self.user == 'admin':
@@ -2048,10 +2104,64 @@ class doctors_list(QtWidgets.QMainWindow):
         self.view_doc_details.clicked.connect(self.doc_information)
 
         self.back_to_adminhome.clicked.connect(self.go_back_adminhome)
+        
+        self.view_doc_details_2.clicked.connect(self.delete_doctor)
 
         self.search_specialisation()
 
         self.populate_doctor_table()
+        
+    def delete_doctor(self):
+        chosen_row = self.tableWidget.currentRow()
+        if chosen_row>=0:
+            name = self.tableWidget.item(chosen_row, 0).text()
+            # assigned_pod = self.tableWidget.item(chosen_row, 3).text()
+            specialization = self.tableWidget.item(chosen_row, 2).text()
+        
+        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
+        connection = pyodbc.connect(connection_string)
+        cursor = connection.cursor()
+        
+        cursor.execute("""
+                SELECT doctor_id from doctor
+                WHERE first_name + ' ' +last_name = ?
+            """, name)
+        
+        doctorID = cursor.fetchall()[0][0]
+        
+        try:
+            # Connect to the database
+            connection = pyodbc.connect(connection_string)
+            cursor = connection.cursor()
+
+            # Attempt to execute the delete query
+            cursor.execute("""
+                DELETE FROM doctor
+                WHERE doctor_id = ?
+            """, doctorID)
+
+            # Commit the changes
+            connection.commit()
+
+            # Display a success message
+            QMessageBox.information(self, "Deletion Successful", "DOctor deleted successfully")
+
+        except pyodbc.Error as e:
+            # Print the full exception details for debugging
+            print("Exception:", e)
+
+            # Handle referential integrity error (error number 547)
+            # if e.args[0] == 547:
+                # Display an error message
+            QMessageBox.warning(self, "Deletion Error", "Referential integrity error. The doctor cannot be deleted.")
+            # else:
+            #     # Handle other database errors
+            #     print("Database error:", e)
+            #     QMessageBox.critical(self, "Database Error", "An error occurred while deleting the appointment.")
+
+        finally:
+            # Close the database connection
+            connection.close()
         
     def doc_information(self):
         chosen_row = self.tableWidget.currentRow()
