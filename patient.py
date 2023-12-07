@@ -6,8 +6,8 @@ import pyodbc
 from PyQt6.QtCore import Qt
 
 
-server = 'DESKTOP-2TB3VB3\SPARTA'
-database = 'db_project'  # Name of your Northwind database
+server = 'M\SPARTA'
+database = 'basabkhatamproject'  # Name of your Northwind database
 use_windows_authentication = True  # Set to True to use Windows Authentication
 
 # 1main homepage
@@ -269,6 +269,7 @@ class ViewBook3(QtWidgets.QMainWindow):
         login_email = self.lineEdit_2.text()  
         login_password = self.lineEdit_3.text()  
 
+
         if ((self.radioButton.isChecked() == False) and (self.radioButton_2.isChecked() == False) and (self.radioButton_3.isChecked() == False)):
             output=QMessageBox(self)              
             output.setWindowTitle("Unidentified Person") 
@@ -293,13 +294,13 @@ class ViewBook3(QtWidgets.QMainWindow):
             output.setIcon(QMessageBox.Icon.Warning) 
             button=output.exec()
 
-        elif ((len(login_password)<=5 and len(login_password)>0) or (login_password.isalpha() == True)):
-                output=QMessageBox(self)              
-                output.setWindowTitle("Weak Password") 
-                output.setText("Please use a strong password.")
-                output.setStandardButtons( QMessageBox.StandardButton.Ok)
-                output.setIcon(QMessageBox.Icon.Warning) 
-                button=output.exec()
+        # elif ((len(login_password)<=5 and len(login_password)>0) or (login_password.isalpha() == True)):
+        #         output=QMessageBox(self)              
+        #         output.setWindowTitle("Weak Password") 
+        #         output.setText("Please use a strong password.")
+        #         output.setStandardButtons( QMessageBox.StandardButton.Ok)
+        #         output.setIcon(QMessageBox.Icon.Warning) 
+        #         button=output.exec()
 
         else:
             if (self.radioButton.isChecked()==True):
@@ -573,7 +574,7 @@ class Doctor_homepage(QtWidgets.QMainWindow):
 
 # 8patient homepage
 class Patient_homepage(QtWidgets.QMainWindow):  
-    def __init__(self, email="default"):
+    def __init__(self, email):
         super(Patient_homepage, self).__init__() 
         uic.loadUi('patienthomeFINAL2.0.ui', self) 
         self.setWindowTitle("Patient Homepage")
@@ -675,14 +676,14 @@ class Patient_Records(QtWidgets.QMainWindow):
                 DOB,
                 contact
             FROM patients
-            WHERE first_name LIKE ? OR last_name LIKE ?;
+            WHERE first_name LIKE ? OR last_name LIKE ? OR first_name + ' ' + last_name LIKE ?;
         """
 
         connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
         connection = pyodbc.connect(connection_string)
 
         cursor = connection.cursor()
-        cursor.execute(query, ('%' + inputname + '%', '%' + inputname + '%'))
+        cursor.execute(query, ('%' + inputname + '%', '%' + inputname + '%', '%' + inputname + '%'))
 
         # Clear the table before populating with new data
         self.tableWidget.clear()
@@ -729,7 +730,6 @@ class Patient_Records(QtWidgets.QMainWindow):
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
         
-
     
 # 10expanded patient history
 class Patient_History(QtWidgets.QMainWindow):  
@@ -1550,7 +1550,7 @@ class Appointments_booking(QtWidgets.QMainWindow):
         status =''
         outcome = ''
         print(appointment_id, slot_id, cancel_appointment, patient_id, amount, payment_method_id, doctors_advice, is_admitted, room_num, status, outcome)
-        cursor.execute(sql_query, int(appointment_id), int(slot_id), cancel_appointment, int(patient_id), amount, int(payment_method_id), doctors_advice, is_admitted, int(room_num), status, outcome)
+        cursor.execute(sql_query, int(appointment_id), int(slot_id), cancel_appointment, int(patient_id), amount, int(payment_method_id), None, None, None, None, None)
         connection.commit()
         connection.close()
 
@@ -2492,14 +2492,14 @@ class payment_details(QtWidgets.QMainWindow):
             JOIN patients ON appointments_booked.patient_id = patients.patient_id
             JOIN payment_method ON appointments_booked.payment_method_id = payment_method.payment_method_id
             JOIN slots_available ON slots_available.slot_id = appointments_booked.slot_id
-            WHERE patients.first_name LIKE ? OR patients.last_name LIKE ?;
+            WHERE patients.first_name LIKE ? OR patients.last_name LIKE ? OR patients.first_name + ' ' + patients.last_name LIKE ?;
         """
 
         connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
         connection = pyodbc.connect(connection_string)
 
         cursor = connection.cursor()
-        cursor.execute(query, ('%' + name_input + '%', '%' + name_input + '%'))
+        cursor.execute(query, ('%' + name_input + '%', '%' + name_input + '%', '%' + name_input + '%'))
 
         # Clear the table before populating with new data
         self.tableWidget.clear()
@@ -2520,10 +2520,10 @@ class patient_booked_appointments(QtWidgets.QMainWindow):
     def __init__(self, email):
         super(patient_booked_appointments, self).__init__() 
         uic.loadUi('app_booked(patient).ui', self) 
-        # ... (other initialization code)
 
         self.show()
         self.email = email
+        print(self.email)
         
         connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
         connection = pyodbc.connect(connection_string)
@@ -2536,29 +2536,33 @@ class patient_booked_appointments(QtWidgets.QMainWindow):
         result = cursor.fetchall()
 
         if result:
+            # Ensure that patientID is defined before using it
             patientID = result[0][0]
             self.populate_doctor_appointment_table(patientID)
-        else:
-            # Handle the case where no patient ID is found for the given email
-            print("Patient ID not found for email:", self.email)
 
         self.pushButton.clicked.connect(self.backtohomepage)
+
 
         self.populate_doctor_appointment_table(patientID)
 
     def backtohomepage(self):
-        self.new_form = Patient_homepage()
+        self.new_form = Patient_homepage(self.email)
         self.new_form.show()
         self.close()
 
-    def populate_doctor_appointment_table(self,patientID):
+    def populate_doctor_appointment_table(self, patientID):
         connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
         connection = pyodbc.connect(connection_string)
         
         self.patientID = patientID
+        print(self.patientID)
         # Create a cursor to interact with the database
         cursor = connection.cursor()
-        
+
+        # Clear existing rows and set row count to 0
+        self.doctor_appointment_table.clearContents()
+        self.doctor_appointment_table.setRowCount(0)
+
         # TODO: Write SQL query to fetch doctor appointment data with assigned pod
         cursor.execute("""
                     SELECT 
@@ -2566,15 +2570,17 @@ class patient_booked_appointments(QtWidgets.QMainWindow):
                         d.assigned_pod AS doctor_assigned_pod,
                         s.day AS appointment_day,
                         FORMAT(CONVERT(datetime, s.year + '-' + s.month + '-' + s.dateday), 'dd/MM/yyyy') AS appointment_date, 
-                       CONVERT(VARCHAR, s.start_time, 108) AS appointment_start_time
+                        CONVERT(VARCHAR, s.start_time, 108) AS appointment_start_time
                     FROM appointments_booked a
                     JOIN slots_available s ON a.slot_id = s.slot_id
                     JOIN doctor d ON d.doctor_id = s.doctor_id where patient_id = ?;
-                """,self.patientID)
-
+                """, self.patientID)
 
         for row_index, row_data in enumerate(cursor.fetchall()):
+            # Append a new row
             self.doctor_appointment_table.insertRow(row_index)
+
+            # Populate the row with data
             for col_index, cell_data in enumerate(row_data):
                 item = QTableWidgetItem(str(cell_data))
                 item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable) 
@@ -2590,6 +2596,8 @@ class patient_booked_appointments(QtWidgets.QMainWindow):
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
+
+
 
 # 20editable patient history view by doctor only
 class editable_patient_history(QtWidgets.QMainWindow):  
@@ -2642,31 +2650,41 @@ class editable_patient_history(QtWidgets.QMainWindow):
         self.listWidget_4.addItem(treatment)
         self.lineEdit.clear()
     
-    def changes_saved(self):
+    def insert_into_database(self):
+        
         connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
         connection = pyodbc.connect(connection_string)
-
+        
+        self.patientID
+        print("id = ", self.patientID)
         cursor = connection.cursor()
         
         cursor.execute("""
             SELECT count(appointment_id) from appointments_booked
             """)
         
-        current_appointment = cursor.fetchall()[0][0]+1
-        # print("app = ", current_appointment)
+        cursor.execute("""
+            SELECT TOP 1 appointment_id
+            FROM appointments_booked
+            WHERE patient_id = ?
+            ORDER BY appointment_id DESC; 
+            """,self.patientID)
+        
+        current_appointment = cursor.fetchall()[0][0]
+        print("app = ", current_appointment)
         
         if self.listWidget_4.item(0) is not None:
             doctorAdvice = self.listWidget_4.item(0).text()
             # print("advice = ",doctorAdvice)
         else:
-            doctorAdvice = 'none'
+            doctorAdvice = None
         if self.checkBox_6.isChecked():
             admitted = 1
             room = self.lineEdit_10.text()
             # print("room = ", room)
         else:
             admitted = 0
-            room = 0
+            room = None
         
         if self.radioButton_9.isChecked():
             status = 'Discharged'
@@ -2677,7 +2695,7 @@ class editable_patient_history(QtWidgets.QMainWindow):
         elif self.radioButton_8.isChecked():
             status = 'Death'
         else:
-            status = 'NULL'
+            status = None
             
         if self.radioButton_2.isChecked():
             outcome = 'Significant Improvement'
@@ -2690,13 +2708,14 @@ class editable_patient_history(QtWidgets.QMainWindow):
         elif self.radioButton_6.isChecked():
             outcome = 'Condition Worsened'
         else:
-            outcome = 'NULL'
+            outcome = None
         
         cursor.execute("""
-            INSERT INTO appointments_booked (appointment_id, slot_id, cancel_appointment, patient_id, amount, doctors_advice, is_admitted, room_num, status, outcome)
-            VALUES
-            (?, ?,0,?,700.00,?,?,?,?,?)
-            """,current_appointment,self.slotID,self.patientID,doctorAdvice,admitted,room,status,outcome)
+            UPDATE appointments_booked 
+            SET doctors_advice = ?, is_admitted= ?, room_num = ?, status = ?, outcome = ?
+            WHERE appointment_id = ?
+            """,doctorAdvice,admitted,room,status,outcome,current_appointment)
+
         
         
         # storing symptoms from list widget
@@ -2771,6 +2790,9 @@ class editable_patient_history(QtWidgets.QMainWindow):
         connection.close()
         
         
+    
+    def changes_saved(self,patientID):
+        self.insert_into_database()
         
         output=QMessageBox(self)              
         output.setWindowTitle("Patient Medical History") 
@@ -2779,6 +2801,152 @@ class editable_patient_history(QtWidgets.QMainWindow):
         output.setIcon(QMessageBox.Icon.Information) 
         button=output.exec()
         self.close()
+        # connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
+        # connection = pyodbc.connect(connection_string)
+        
+        # self.patientID = patientID
+        # print("id = ", self.patientID)
+        # cursor = connection.cursor()
+        
+        # cursor.execute("""
+        #     SELECT count(appointment_id) from appointments_booked
+        #     """)
+        
+        # cursor.execute("""
+        #     SELECT TOP 1 appointment_id
+        #     FROM appointments_booked
+        #     WHERE patient_id = ?
+        #     ORDER BY appointment_id DESC; 
+        #     """,self.patientID)
+        
+        # current_appointment = cursor.fetchall()
+        # print("app = ", current_appointment)
+        
+        # if self.listWidget_4.item(0) is not None:
+        #     doctorAdvice = self.listWidget_4.item(0).text()
+        #     # print("advice = ",doctorAdvice)
+        # else:
+        #     doctorAdvice = None
+        # if self.checkBox_6.isChecked():
+        #     admitted = 1
+        #     room = self.lineEdit_10.text()
+        #     # print("room = ", room)
+        # else:
+        #     admitted = 0
+        #     room = None
+        
+        # if self.radioButton_9.isChecked():
+        #     status = 'Discharged'
+        # elif self.radioButton_10.isChecked():
+        #     status = 'Lost for follow-Up'
+        # elif self.radioButton_11.isChecked():
+        #     status = 'Transfer'
+        # elif self.radioButton_8.isChecked():
+        #     status = 'Death'
+        # else:
+        #     status = None
+            
+        # if self.radioButton_2.isChecked():
+        #     outcome = 'Significant Improvement'
+        # elif self.radioButton_3.isChecked():
+        #     outcome = 'Moderate Improvement'
+        # elif self.radioButton_4.isChecked():
+        #     outcome = 'Mild Improvement'
+        # elif self.radioButton_5.isChecked():
+        #     outcome = 'No Change'
+        # elif self.radioButton_6.isChecked():
+        #     outcome = 'Condition Worsened'
+        # else:
+        #     outcome = None
+        
+        # cursor.execute("""
+        #     UPDATE appointments_booked 
+        #     SET doctors_advice = ?, is_admitted= ?, room_num = ?, status = ?, outcome = ?
+        #     WHERE appointment_id = ?
+        #     """,doctorAdvice,admitted,room,status,outcome,current_appointment)
+
+        
+        
+        # # storing symptoms from list widget
+        # for i in range(self.listWidget.count()):
+        #     symptom = self.listWidget.item(i).text()
+        #     # print(symptom)
+        #     cursor.execute("""
+        #     INSERT INTO patient_record_symptoms (appointment_id, symptoms)
+        #     VALUES
+        #     (?, ?)
+        #     """,current_appointment,symptom)
+            
+        # for i in range(self.listWidget_3.count()):
+        #     diagnosis = self.listWidget_3.item(i).text()
+        #     # print(diagnosis)
+        #     cursor.execute("""
+        #     INSERT INTO patient_record_diagnosis (appointment_id, diagnosis)
+        #     VALUES
+        #     (?, ?)
+        #     """,current_appointment,diagnosis)
+            
+        # for i in range(self.listWidget_2.count()):
+        #     allergies = self.listWidget_2.item(i).text()
+        #     # print(allergies)
+        #     cursor.execute("""
+        #     INSERT INTO patient_record_allergies (appointment_id, allergies)
+        #     VALUES
+        #     (?, ?)
+        #     """,current_appointment,allergies)
+            
+        # for i in range(1,self.listWidget_4.count()+1):
+        #     if self.listWidget_4.item(i) is not None:
+        #         medicines = self.listWidget_4.item(i).text()
+        #         # print(medicines)
+        #         cursor.execute("""
+        #         INSERT INTO prescriptions (appointment_id, medicine)
+        #         VALUES
+        #         (?, ?)
+        #         """,current_appointment,medicines)
+            
+        # if self.checkBox.isChecked():
+        #     reason = 'Counseling'
+        #     cursor.execute("""
+        #     INSERT INTO reason_for_visit (appointment_id, reason)
+        #     VALUES
+        #     (?, ?)
+        #     """,current_appointment,reason)
+        # if self.checkBox_4.isChecked():
+        #     reason = 'Psychotheraphy'
+        #     cursor.execute("""
+        #     INSERT INTO reason_for_visit (appointment_id, reason)
+        #     VALUES
+        #     (?, ?)
+        #     """,current_appointment,reason)
+        # if self.checkBox_5.isChecked():
+        #     reason = 'Regular Sessions'
+        #     cursor.execute("""
+        #     INSERT INTO reason_for_visit (appointment_id, reason)
+        #     VALUES
+        #     (?, ?)
+        #     """,current_appointment,reason)
+        # if self.lineEdit_19.text():
+        #     reason = self.lineEdit_19.text()
+        #     cursor.execute("""
+        #     INSERT INTO reason_for_visit (appointment_id, reason)
+        #     VALUES
+        #     (?, ?)
+        #     """,current_appointment,reason)
+            
+            
+        # connection.commit()
+        # connection.close()
+        
+        
+        
+        # output=QMessageBox(self)              
+        # output.setWindowTitle("Patient Medical History") 
+        # output.setText("Changes saved successfully!.")
+        # output.setStandardButtons( QMessageBox.StandardButton.Ok)
+        # output.setIcon(QMessageBox.Icon.Information) 
+        # button=output.exec()
+        # self.close()
         
     def populate_screen(self,patientID):
         self.patientID = patientID
@@ -2821,7 +2989,7 @@ class editable_patient_history(QtWidgets.QMainWindow):
             GROUP BY P.patient_id
         """, patientID)
 
-        current_visit_no = cursor.fetchall()[0][1]+1
+        current_visit_no = cursor.fetchall()[0][1]
         self.lineEdit_8.setText(str(current_visit_no))
                 
         # Close the database connection
