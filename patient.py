@@ -6,7 +6,7 @@ import pyodbc
 from PyQt6.QtCore import Qt
 
 
-server = 'DESKTOP-HPUUN98\SPARTA'
+server = 'DESKTOP-2TB3VB3\SPARTA'
 database = 'db_project'  # Name of your Northwind database
 use_windows_authentication = True  # Set to True to use Windows Authentication
 
@@ -1053,13 +1053,18 @@ class Appointments(QtWidgets.QMainWindow):
         
         self.doctorID = doctorID
         self.login_email = login_email
-        
+        # self.comboBox_changed = False
+        # self.comboBox_2_changed = False
+        # self.day_filter_changed = False
         self.search_app.clicked.connect(self.search_appointments)
         self.back_to_doc_home.clicked.connect(self.backtohome)
         self.populate_comboBox()
+        self.populate_comboBox_2()
         self.view_app_details.clicked.connect(self.appointment_expanded)
         self.populate_appointment_table()
         self.comboBox.currentIndexChanged.connect(self.populate_table)
+        self.comboBox_2.currentIndexChanged.connect(self.day_filter)
+        # self.pushButton.clicked.connect(self.on_generate_button_clicked)
 
     def appointment_expanded(self):
         chosen_row = self.apptable.currentRow()
@@ -1176,6 +1181,49 @@ class Appointments(QtWidgets.QMainWindow):
                 self.apptable.showRow(row_index)
             else:
                 self.apptable.hideRow(row_index)
+    def populate_comboBox_2(self):
+        # connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
+        # connection = pyodbc.connect(connection_string)
+        # cursor = connection.cursor()
+        # cursor.execute("""
+        #                select distinct day from slots_available
+        #             """)
+        days = ['Monday','Tuesday','Wednesday','Thursday','Friday']
+        # days=cursor.fetchall()
+            # Populate the ComboBox with doctor names
+        for day in days:
+            self.comboBox_2.addItem(day)
+    def day_filter(self):
+        selected_day=self.comboBox_2.currentText()
+        # Iterate through rows in the table and show only those matching the selected doctor
+        for row_index in range(self.apptable.rowCount()):
+            doctor_name_item = self.apptable.item(row_index, 3)  # Replace with the actual column index
+            if doctor_name_item is not None and doctor_name_item.text() == selected_day:
+                self.apptable.showRow(row_index)
+            else:
+                self.apptable.hideRow(row_index)
+    # def on_comboBox_changed(self):
+    #     self.comboBox_changed = True
+
+    # def on_comboBox_2_changed(self):
+    #     self.comboBox_2_changed = True
+
+    # def on_generate_button_clicked(self):
+    #     if self.comboBox_2_changed:
+    #         self.day_filter_changed = True  # Set the flag if day filter combo box changed
+    #         self.comboBox_2_changed = False  # Reset the flag after processing the change
+
+    #     # Check the flags and apply filters sequentially
+    #     if self.day_filter_changed:
+    #         self.day_filter()
+    #         # Reset the day filter flag after processing
+    #         self.day_filter_changed = False
+
+    #     if self.comboBox_changed:
+    #         self.populate_table()
+    #         self.comboBox_changed = False  # Reset the flag after processing the change
+
+        
 
 # 12expanded appointment details
 class Appointments_details(QtWidgets.QMainWindow):  

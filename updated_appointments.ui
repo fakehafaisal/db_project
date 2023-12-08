@@ -158,60 +158,24 @@
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>270</x>
+      <x>340</x>
       <y>90</y>
       <width>41</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>time:</string>
+     <string>day:</string>
     </property>
    </widget>
    <widget class="QComboBox" name="comboBox_2">
     <property name="geometry">
      <rect>
-      <x>360</x>
+      <x>390</x>
       <y>90</y>
-      <width>51</width>
+      <width>91</width>
       <height>22</height>
      </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_5">
-    <property name="geometry">
-     <rect>
-      <x>430</x>
-      <y>80</y>
-      <width>51</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>to</string>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="comboBox_3">
-    <property name="geometry">
-     <rect>
-      <x>460</x>
-      <y>90</y>
-      <width>51</width>
-      <height>22</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton">
-    <property name="geometry">
-     <rect>
-      <x>550</x>
-      <y>90</y>
-      <width>81</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Generate</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_6">
@@ -230,7 +194,7 @@
    <widget class="QLabel" name="label_7">
     <property name="geometry">
      <rect>
-      <x>270</x>
+      <x>340</x>
       <y>80</y>
       <width>51</width>
       <height>31</height>
