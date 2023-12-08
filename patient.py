@@ -386,7 +386,6 @@ class ViewBook3(QtWidgets.QMainWindow):
 
         return cursor.fetchone() is not None
 
-
 # 5doctor signup
 class ViewBook4(QtWidgets.QMainWindow):  
     def __init__(self, first_name, last_name, email, password, confirm_password):
@@ -614,7 +613,6 @@ class Patient_homepage(QtWidgets.QMainWindow):
         self.new_form.show()
         self.close()
 
-
 # 9patient list
 class Patient_Records(QtWidgets.QMainWindow):  
     def __init__(self,user,login_email):
@@ -785,8 +783,7 @@ class Patient_Records(QtWidgets.QMainWindow):
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
-        
-    
+           
 # 10expanded patient history
 class Patient_History(QtWidgets.QMainWindow):  
     def __init__(self,user,firstname,p_contact, login_email):
@@ -1179,8 +1176,6 @@ class Appointments(QtWidgets.QMainWindow):
                 self.apptable.showRow(row_index)
             else:
                 self.apptable.hideRow(row_index)
-
-        
 
 # 12expanded appointment details
 class Appointments_details(QtWidgets.QMainWindow):  
@@ -1614,7 +1609,6 @@ class Appointments_booking(QtWidgets.QMainWindow):
         connection.commit()
         connection.close()
 
-        
 # 14patient history private veiw for patient
 class Private_view_patient(QtWidgets.QMainWindow):  
     def __init__(self, email):
@@ -2711,8 +2705,6 @@ class patient_booked_appointments(QtWidgets.QMainWindow):
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
-
-
 
 # 20editable patient history view by doctor only
 class editable_patient_history(QtWidgets.QMainWindow):  
