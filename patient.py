@@ -104,6 +104,14 @@ class ViewBook(QtWidgets.QMainWindow):
                 output.setStandardButtons( QMessageBox.StandardButton.Ok)
                 output.setIcon(QMessageBox.Icon.Warning) 
                 button=output.exec() 
+                
+            elif ('@' not in email) or ('.com' not in email):
+                output=QMessageBox(self)              
+                output.setWindowTitle("Wrong Email Entry") 
+                output.setText("Please Enter correct Email")
+                output.setStandardButtons( QMessageBox.StandardButton.Ok)
+                output.setIcon(QMessageBox.Icon.Warning) 
+                button=output.exec() 
 
             elif ((len(password)<=7 and len(password)>=0) or (password.isalpha() == True)):
                 output=QMessageBox(self)              
