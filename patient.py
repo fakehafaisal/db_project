@@ -6,8 +6,8 @@ import pyodbc
 from PyQt6.QtCore import Qt
 
 
-server = 'DESKTOP-2TB3VB3\SPARTA'
-database = 'db_project'  # Name of your Northwind database
+server = 'M\SPARTA'
+database = 'basabkhatamproject'  # Name of your Northwind database
 use_windows_authentication = True  # Set to True to use Windows Authentication
 
 # 1main homepage
@@ -1763,142 +1763,143 @@ class Private_view_patient(QtWidgets.QMainWindow):
     def get_selected_text(self):
         selected_text = self.comboBox.currentText()
         print(f"Selected Text: {selected_text}")
-        iteration_num=int(selected_text)-1
-        corresponding_appointment_id=self.appoint_ids[iteration_num]
-        # print(corresponding_appointment_id)
-        self.listWidget.clear()
-        self.listWidget_2.clear()
-        self.listWidget_3.clear()
-        self.listWidget_4.clear()
-        self.lineEdit_10.clear()
-        self.checkBox_6.setChecked(False)
-        self.checkBox.setChecked(False)
-        self.checkBox_4.setChecked(False)
-        self.checkBox_5.setChecked(False)
-        self.lineEdit_19.clear()
-        self.radioButton_2.setChecked(False)
-        self.radioButton_3.setChecked(False)
-        self.radioButton_4.setChecked(False)
-        self.radioButton_5.setChecked(False)
-        self.radioButton_6.setChecked(False)
-        self.radioButton_9.setChecked(False)
-        self.radioButton_10.setChecked(False)
-        self.radioButton_11.setChecked(False)
-        self.radioButton_8.setChecked(False)
+        if selected_text:
+            iteration_num=int(selected_text)-1
+            corresponding_appointment_id=self.appoint_ids[iteration_num]
+            # print(corresponding_appointment_id)
+            self.listWidget.clear()
+            self.listWidget_2.clear()
+            self.listWidget_3.clear()
+            self.listWidget_4.clear()
+            self.lineEdit_10.clear()
+            self.checkBox_6.setChecked(False)
+            self.checkBox.setChecked(False)
+            self.checkBox_4.setChecked(False)
+            self.checkBox_5.setChecked(False)
+            self.lineEdit_19.clear()
+            self.radioButton_2.setChecked(False)
+            self.radioButton_3.setChecked(False)
+            self.radioButton_4.setChecked(False)
+            self.radioButton_5.setChecked(False)
+            self.radioButton_6.setChecked(False)
+            self.radioButton_9.setChecked(False)
+            self.radioButton_10.setChecked(False)
+            self.radioButton_11.setChecked(False)
+            self.radioButton_8.setChecked(False)
 
-        
-        # Create the connection string based on the authentication method chosen
-        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
+            
+            # Create the connection string based on the authentication method chosen
+            connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
 
-        # Establish a connection to the database
-        connection = pyodbc.connect(connection_string)
-        
-        # Create a cursor to interact with the database
-        cursor = connection.cursor()
-        # TODO: Write SQL query to fetch orders data
-        cursor.execute("""
-                    select symptoms from appointments_booked a join patient_record_symptoms s on a.appointment_id = s.appointment_id where a.appointment_id = ?
-                """,corresponding_appointment_id)
-        
-        all_symptoms = cursor.fetchall()
-        # print(all_symptoms)
-        for row in all_symptoms:
-                self.listWidget.addItem(row.symptoms)
-                
-                
-        cursor.execute("""
-                    select diagnosis from appointments_booked a join patient_record_diagnosis s on a.appointment_id = s.appointment_id where a.appointment_id = ?
-                """,corresponding_appointment_id)
-        
-        all_diagnosis = cursor.fetchall()
-        # print(all_symptoms)
-        for row in all_diagnosis:
-                self.listWidget_3.addItem(row.diagnosis)
-                
-        
-        cursor.execute("""
-                    select allergies from appointments_booked a join patient_record_allergies s on a.appointment_id = s.appointment_id where a.appointment_id = ?
-                """,corresponding_appointment_id)
-        
-        all_allergies = cursor.fetchall()
-        # print(all_symptoms)
-        for row in all_allergies:
-                self.listWidget_2.addItem(row.allergies)
-                
-                
-        cursor.execute("""
-                    select doctors_advice,medicine from appointments_booked a join prescriptions s on a.appointment_id = s.appointment_id where a.appointment_id = ?
-                """,corresponding_appointment_id)
-        
-        all_treatments = cursor.fetchall()
-        # print(all_symptoms)
-        for row in all_treatments:
-                self.listWidget_4.addItem(row.doctors_advice)
-                self.listWidget_4.addItem(row.medicine)
-                
-                
-        cursor.execute("""
-                    select a.appointment_id,a.is_admitted,a.room_num from appointments_booked a join patients p on a.patient_id=p.patient_id where p.patient_id=?
-                """,corresponding_appointment_id)
-        
-        admitted = cursor.fetchall()
-        print(admitted)
-        if admitted:
-                is_admitted = admitted[0].is_admitted
-                print(is_admitted)
-                self.checkBox_6.setChecked(is_admitted)
-                if is_admitted==True:
-                    self.lineEdit_10.setText(str(admitted[0].room_num))
-        else:
-            print("No admission status found for the selected appointment.")
+            # Establish a connection to the database
+            connection = pyodbc.connect(connection_string)
             
+            # Create a cursor to interact with the database
+            cursor = connection.cursor()
+            # TODO: Write SQL query to fetch orders data
+            cursor.execute("""
+                        select symptoms from appointments_booked a join patient_record_symptoms s on a.appointment_id = s.appointment_id where a.appointment_id = ?
+                    """,corresponding_appointment_id)
             
-        cursor.execute("""
-                    select a.appointment_id,reason from reason_for_visit r join appointments_booked a on r.appointment_id=a.appointment_id where a.appointment_id=?
-                """,corresponding_appointment_id)
-        
-        reasons = cursor.fetchall()
-        
-        for reason in reasons:
-            if reason[1] == 'Counselling':
-                self.checkBox.setChecked(True)
-            elif reason[1]== 'Psychotherapy':
-                self.checkBox_4.setChecked(True)
-            elif reason[1] == 'Regular Sessions':
-                self.checkBox_5.setChecked(True)
+            all_symptoms = cursor.fetchall()
+            # print(all_symptoms)
+            for row in all_symptoms:
+                    self.listWidget.addItem(row.symptoms)
+                    
+                    
+            cursor.execute("""
+                        select diagnosis from appointments_booked a join patient_record_diagnosis s on a.appointment_id = s.appointment_id where a.appointment_id = ?
+                    """,corresponding_appointment_id)
+            
+            all_diagnosis = cursor.fetchall()
+            # print(all_symptoms)
+            for row in all_diagnosis:
+                    self.listWidget_3.addItem(row.diagnosis)
+                    
+            
+            cursor.execute("""
+                        select allergies from appointments_booked a join patient_record_allergies s on a.appointment_id = s.appointment_id where a.appointment_id = ?
+                    """,corresponding_appointment_id)
+            
+            all_allergies = cursor.fetchall()
+            # print(all_symptoms)
+            for row in all_allergies:
+                    self.listWidget_2.addItem(row.allergies)
+                    
+                    
+            cursor.execute("""
+                        select doctors_advice,medicine from appointments_booked a join prescriptions s on a.appointment_id = s.appointment_id where a.appointment_id = ?
+                    """,corresponding_appointment_id)
+            
+            all_treatments = cursor.fetchall()
+            # print(all_symptoms)
+            for row in all_treatments:
+                    self.listWidget_4.addItem(row.doctors_advice)
+                    self.listWidget_4.addItem(row.medicine)
+                    
+                    
+            cursor.execute("""
+                        select a.appointment_id,a.is_admitted,a.room_num from appointments_booked a join patients p on a.patient_id=p.patient_id where p.patient_id=?
+                    """,corresponding_appointment_id)
+            
+            admitted = cursor.fetchall()
+            print(admitted)
+            if admitted:
+                    is_admitted = admitted[0].is_admitted
+                    print(is_admitted)
+                    self.checkBox_6.setChecked(is_admitted)
+                    if is_admitted==True:
+                        self.lineEdit_10.setText(str(admitted[0].room_num))
             else:
-                self.lineEdit_19.setText(reason[1])
+                print("No admission status found for the selected appointment.")
                 
-        cursor.execute("""
-                    select status,outcome,appointment_id from appointments_booked where appointment_id =?
-                """,corresponding_appointment_id)
-        
-        status_outcome = cursor.fetchall()
-        status = status_outcome[0][0]
-        if status == 'Significant Improvement':
-            self.radioButton_2.setChecked(True)
-        elif status== 'Mild Improvement':
-            self.radioButton_4.setChecked(True)
-        elif status == 'Moderate Improvement':
-            self.radioButton_3.setChecked(True)
-        elif status == 'No Change':
-            self.radioButton_5.setChecked(True)
-        elif status == 'Condition Worsened':
-            self.radioButton_6.setChecked(True)
+                
+            cursor.execute("""
+                        select a.appointment_id,reason from reason_for_visit r join appointments_booked a on r.appointment_id=a.appointment_id where a.appointment_id=?
+                    """,corresponding_appointment_id)
             
-        outcome = status_outcome[0][1]
-        if outcome == 'Discharged':
-            self.radioButton_9.setChecked(True)
-        elif outcome== 'Lost for follow-Up':
-            self.radioButton_10.setChecked(True)
-        elif outcome == 'Transfer':
-            self.radioButton_11.setChecked(True)
-        elif outcome == 'Death':
-            self.radioButton_8.setChecked(True)
-
+            reasons = cursor.fetchall()
+            
+            for reason in reasons:
+                if reason[1] == 'Counselling':
+                    self.checkBox.setChecked(True)
+                elif reason[1]== 'Psychotherapy':
+                    self.checkBox_4.setChecked(True)
+                elif reason[1] == 'Regular Sessions':
+                    self.checkBox_5.setChecked(True)
+                else:
+                    self.lineEdit_19.setText(reason[1])
+                    
+            cursor.execute("""
+                        select status,outcome,appointment_id from appointments_booked where appointment_id =?
+                    """,corresponding_appointment_id)
+            
+            status_outcome = cursor.fetchall()
+            status = status_outcome[0][0]
+            if status == 'Significant Improvement':
+                self.radioButton_2.setChecked(True)
+            elif status== 'Mild Improvement':
+                self.radioButton_4.setChecked(True)
+            elif status == 'Moderate Improvement':
+                self.radioButton_3.setChecked(True)
+            elif status == 'No Change':
+                self.radioButton_5.setChecked(True)
+            elif status == 'Condition Worsened':
+                self.radioButton_6.setChecked(True)
                 
-        # Close the database connection
-        connection.close()
+            outcome = status_outcome[0][1]
+            if outcome == 'Discharged':
+                self.radioButton_9.setChecked(True)
+            elif outcome== 'Lost for follow-Up':
+                self.radioButton_10.setChecked(True)
+            elif outcome == 'Transfer':
+                self.radioButton_11.setChecked(True)
+            elif outcome == 'Death':
+                self.radioButton_8.setChecked(True)
+
+                    
+            # Close the database connection
+            connection.close()
 
 # 15appointments list view for doctor
 class app_view_doc(QtWidgets.QMainWindow):  
