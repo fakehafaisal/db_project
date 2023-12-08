@@ -623,7 +623,8 @@ class Patient_Records(QtWidgets.QMainWindow):
         self.width = self.frameGeometry().width()
         self.height = self.frameGeometry().height()
         self.setFixedSize(self.width, self.height)
-
+        # self.pushButton.clicked.connect(filter_age)
+        self.comboBox.currentIndexChanged.connect(self.filter_by_gender)
         self.show()
         self.user = user
         self.login_email = login_email
@@ -636,7 +637,8 @@ class Patient_Records(QtWidgets.QMainWindow):
         self.view_button.clicked.connect(self.patient_history)
         
         self.view_button_2.clicked.connect(self.delete_patient)
-
+        self.populate_comboBox()
+        
         self.populate_table()
         
     def delete_patient(self):
@@ -783,7 +785,28 @@ class Patient_Records(QtWidgets.QMainWindow):
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
-           
+    # def populate_comboBox(self):
+    #     ages=['Under 20','20-30','30-40','40+']     
+    #     for age in ages:
+    #         self.comboBox.addItem(age)
+    def populate_comboBox(self):
+        gender = ['Male','Female']
+        for g in gender:
+            self.comboBox.addItem(g)
+            
+    def filter_by_gender(self):
+        # Get the selected gender from the combobox
+        selected_gender = self.comboBox.currentText()
+
+        # Iterate through the existing rows in the table and show/hide them based on the selected gender
+        for row_index in range(self.tableWidget.rowCount()):
+            gender_item = self.tableWidget.item(row_index, 2)  # Replace with the actual column index of the gender
+            if gender_item is not None and gender_item.text() == selected_gender:
+                self.tableWidget.showRow(row_index)
+            else:
+                self.tableWidget.hideRow(row_index)
+    
+        
 # 10expanded patient history
 class Patient_History(QtWidgets.QMainWindow):  
     def __init__(self,user,firstname,p_contact, login_email):
