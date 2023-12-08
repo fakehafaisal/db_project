@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>673</width>
-    <height>447</height>
+    <width>671</width>
+    <height>446</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -348,28 +348,6 @@ background-image: url(:/newPrefix/Downloads/person pic.webp);</string>
       <string>View Doctors</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_5">
-     <property name="geometry">
-      <rect>
-       <x>240</x>
-       <y>150</y>
-       <width>101</width>
-       <height>101</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-image: url(:/newPrefix/payment images.webp);</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="pixmap">
-      <pixmap>qrc/payment images.webp</pixmap>
-     </property>
-     <property name="scaledContents">
-      <bool>true</bool>
-     </property>
-    </widget>
     <widget class="QLabel" name="label_10">
      <property name="geometry">
       <rect>
@@ -455,6 +433,28 @@ background-image: url(:/newPrefix/Downloads/person pic.webp);</string>
       <string>Log Out</string>
      </property>
     </widget>
+    <widget class="QLabel" name="label_5">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>150</y>
+       <width>101</width>
+       <height>101</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-image: url(:/newPrefix/payment.jpg);</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap>payment.jpg</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -462,16 +462,16 @@ background-image: url(:/newPrefix/Downloads/person pic.webp);</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>673</width>
-     <height>21</height>
+     <width>671</width>
+     <height>18</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources>
-  <include location="doctor2.qrc"/>
   <include location="qrc/payment.qrc"/>
+  <include location="payment.qrc"/>
   <include location="qrc/approval.qrc"/>
   <include location="qrc/doc.qrc"/>
   <include location="qrc/person.qrc"/>
