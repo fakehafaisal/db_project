@@ -1078,8 +1078,22 @@ class Appointments(QtWidgets.QMainWindow):
             day = self.apptable.item(chosen_row, 3).text()
             cancelled=eval(self.apptable.item(chosen_row, 4).text())
             # print(name,time,day,cancelled)
-
-        self.new_form = Appointments_details(name, time, day, cancelled,doctor, self.doctorID, self.login_email)
+            query_for_date = f"""
+            SELECT 
+				format(DATEFROMPARTS(s.year,s.month,s.dateday),'dd/MM/yyyy') AS appointment_date
+            FROM patients p
+            JOIN appointments_booked a ON p.patient_id = a.patient_id
+            JOIN slots_available s ON s.slot_id = a.slot_id
+            JOIN doctor d ON d.doctor_id = s.doctor_id
+            WHERE p.first_name + ' ' + p.last_name LIKE ? and s.start_time = ?
+            """
+            connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
+            connection = pyodbc.connect(connection_string)
+            print(name)
+            cursor = connection.cursor()
+            cursor.execute(query_for_date, ('%' + name + '%',time))
+            date = cursor.fetchall()[0][0]
+        self.new_form = Appointments_details(name, time, day, cancelled,doctor, self.doctorID, self.login_email, date)
         self.new_form.show()
         self.close()
 
@@ -1227,7 +1241,7 @@ class Appointments(QtWidgets.QMainWindow):
 
 # 12expanded appointment details
 class Appointments_details(QtWidgets.QMainWindow):  
-    def __init__(self, name, time, day, cancelled,doctor, DoctorID, login_email):
+    def __init__(self, name, time, day, cancelled,doctor, DoctorID, login_email, date):
         super(Appointments_details, self).__init__() 
         uic.loadUi('appointment_details.ui', self) 
         self.setWindowTitle("Appointment Details")
@@ -1236,6 +1250,7 @@ class Appointments_details(QtWidgets.QMainWindow):
         self.lineEdit_3.setText(time)
         self.lineEdit_5.setText(day)
         self.checkBox_2.setChecked(cancelled)
+        self.lineEdit_4.setText(date)
 
         self.width = self.frameGeometry().width()
         self.height = self.frameGeometry().height()
@@ -2728,7 +2743,7 @@ class patient_booked_appointments(QtWidgets.QMainWindow):
                         d.first_name + ' ' + d.last_name AS doctor_name,
                         d.assigned_pod AS doctor_assigned_pod,
                         s.day AS appointment_day,
-                        FORMAT(CONVERT(datetime, s.year + '-' + s.month + '-' + s.dateday), 'dd/MM/yyyy') AS appointment_date, 
+                        FORMAT(DATEFROMPARTS(s.year,s.month,s.dateday), 'dd/MM/yyyy') AS appointment_date, 
                         CONVERT(VARCHAR, s.start_time, 108) AS appointment_start_time
                     FROM appointments_booked a
                     JOIN slots_available s ON a.slot_id = s.slot_id
