@@ -1063,7 +1063,8 @@ class Appointments(QtWidgets.QMainWindow):
         self.view_app_details.clicked.connect(self.appointment_expanded)
         self.populate_appointment_table()
         self.comboBox.currentIndexChanged.connect(self.populate_table)
-        self.comboBox_2.currentIndexChanged.connect(self.day_filter)
+        self.comboBox_2.currentIndexChanged.connect(self.populate_table)
+        
         # self.pushButton.clicked.connect(self.on_generate_button_clicked)
 
     def appointment_expanded(self):
@@ -1171,6 +1172,28 @@ class Appointments(QtWidgets.QMainWindow):
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+    
+    def populate_table(self):
+    # Get the selected values from both ComboBoxes
+        selected_doctor = self.comboBox.currentText()
+        selected_day = self.comboBox_2.currentText()
+
+        # Iterate through rows in the table and show only those matching the selected doctor and day
+        for row_index in range(self.apptable.rowCount()):
+            doctor_name_item = self.apptable.item(row_index, 1)  # Replace with the actual column index
+            day_item = self.apptable.item(row_index, 3)  # Replace with the actual column index
+
+            # Check if both filters match
+            show_row = (
+                (doctor_name_item is not None and doctor_name_item.text() == selected_doctor) and
+                (day_item is not None and day_item.text() == selected_day)
+            )
+
+            if show_row:
+                self.apptable.showRow(row_index)
+            else:
+                self.apptable.hideRow(row_index)
+
     def populate_comboBox(self):
         connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
         connection = pyodbc.connect(connection_string)
@@ -1185,58 +1208,38 @@ class Appointments(QtWidgets.QMainWindow):
             self.comboBox.addItem(str(doctor_name[0]))
 
         connection.close()
-    def populate_table(self):
-        selected_doctor = self.comboBox.currentText()
+    # def populate_table(self):
+    #     selected_doctor = self.comboBox.currentText()
 
-        # Iterate through rows in the table and show only those matching the selected doctor
-        for row_index in range(self.apptable.rowCount()):
-            doctor_name_item = self.apptable.item(row_index, 1)  # Replace with the actual column index
-            if doctor_name_item is not None and doctor_name_item.text() == selected_doctor:
-                self.apptable.showRow(row_index)
-            else:
-                self.apptable.hideRow(row_index)
+    #     # Iterate through rows in the table and show only those matching the selected doctor
+    #     for row_index in range(self.apptable.rowCount()):
+    #         doctor_name_item = self.apptable.item(row_index, 1)  # Replace with the actual column index
+    #         if doctor_name_item is not None and doctor_name_item.text() == selected_doctor:
+    #             self.apptable.showRow(row_index)
+    #         else:
+    #             self.apptable.hideRow(row_index)
     def populate_comboBox_2(self):
-        # connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
-        # connection = pyodbc.connect(connection_string)
-        # cursor = connection.cursor()
+        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
+        connection = pyodbc.connect(connection_string)
+        cursor = connection.cursor()
         # cursor.execute("""
         #                select distinct day from slots_available
-        #             """)
+        # #             """)
         days = ['Monday','Tuesday','Wednesday','Thursday','Friday']
         # days=cursor.fetchall()
             # Populate the ComboBox with doctor names
         for day in days:
             self.comboBox_2.addItem(day)
-    def day_filter(self):
-        selected_day=self.comboBox_2.currentText()
-        # Iterate through rows in the table and show only those matching the selected doctor
-        for row_index in range(self.apptable.rowCount()):
-            doctor_name_item = self.apptable.item(row_index, 3)  # Replace with the actual column index
-            if doctor_name_item is not None and doctor_name_item.text() == selected_day:
-                self.apptable.showRow(row_index)
-            else:
-                self.apptable.hideRow(row_index)
-    # def on_comboBox_changed(self):
-    #     self.comboBox_changed = True
-
-    # def on_comboBox_2_changed(self):
-    #     self.comboBox_2_changed = True
-
-    # def on_generate_button_clicked(self):
-    #     if self.comboBox_2_changed:
-    #         self.day_filter_changed = True  # Set the flag if day filter combo box changed
-    #         self.comboBox_2_changed = False  # Reset the flag after processing the change
-
-    #     # Check the flags and apply filters sequentially
-    #     if self.day_filter_changed:
-    #         self.day_filter()
-    #         # Reset the day filter flag after processing
-    #         self.day_filter_changed = False
-
-    #     if self.comboBox_changed:
-    #         self.populate_table()
-    #         self.comboBox_changed = False  # Reset the flag after processing the change
-
+    # def day_filter(self):
+    #     selected_day=self.comboBox_2.currentText()
+    #     # Iterate through rows in the table and show only those matching the selected doctor
+    #     for row_index in range(self.apptable.rowCount()):
+    #         doctor_name_item = self.apptable.item(row_index, 3)  # Replace with the actual column index
+    #         if doctor_name_item is not None and doctor_name_item.text() == selected_day:
+    #             self.apptable.showRow(row_index)
+    #         else:
+    #             self.apptable.hideRow(row_index)
+  
         
 
 # 12expanded appointment details
