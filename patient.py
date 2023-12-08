@@ -1335,6 +1335,7 @@ class Appointments_details(QtWidgets.QMainWindow):
         
 # 13slots available booking
 class Appointments_booking(QtWidgets.QMainWindow):  
+
     def __init__(self,login_email):
         super(Appointments_booking, self).__init__() 
         uic.loadUi('patientappointment.ui', self) 
@@ -3150,11 +3151,8 @@ class editable_patient_history(QtWidgets.QMainWindow):
         # Close the database connection
         connection.close()
         
-
-
+        
 app = QtWidgets.QApplication(sys.argv)
 window = MainWindow()
 window.show()
 app.exec()
-
-      
