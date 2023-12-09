@@ -48,13 +48,13 @@ Running the Application:
 
 9. Open the patient.py file. 
 
-10. On line number 9 of the file, change the part DESKTOP-2TB3VB3 of the server to your SQL Server. 
+10. On line number 9 of the file, change the part 'M' of the server to your SQL Server. 
 
-server = 'DESKTOP-2TB3VB3\SPARTA' 
+server = 'M\SPARTA' -> server = '*servername*\SPARTA'
 
-11. On line number 10 of the file, change the part Group4_ProjectDatabase of the database to your named database above (which was of example Group4_ProjectDatabase) 
+11. On line number 10 of the file, change the part 'basabkhatamproject' of the database to your named database above (which was of example Group4_ProjectDatabase) 
 
-database = 'Group4_ProjectDatabase' 
+database = 'basabkhatamproject' -> database = 'Group4_ProjectDatabase'
 
 12. Click on the Run triangular button. Or Run-> Run Without Debugging. Alternatively, you can press Ctrl+F5 to run the program. 
 
